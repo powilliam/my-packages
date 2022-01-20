@@ -43,6 +43,7 @@ android {
 
 dependencies {
     def compose_version = "1.2.0-alpha01"
+    def accompanist_version = "0.24.0-alpha"
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
@@ -63,6 +64,9 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.4.0'
     // Integration with ViewModels
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0'
+
+    implementation "com.google.accompanist:accompanist-insets:$accompanist_version"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

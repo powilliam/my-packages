@@ -3,33 +3,39 @@ package com.powilliam.mypackages.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.core.view.WindowCompat
+import com.google.accompanist.insets.ProvideWindowInsets
 import com.powilliam.mypackages.R
 import com.powilliam.mypackages.ui.theming.MyPackagesTheme
 
 class MyPackagesActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            Content()
+            ProvideWindowInsets {
+                Content()
+            }
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun Content() {
         MyPackagesTheme({ this }) {
-            Surface(Modifier.fillMaxSize()) {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
+            Scaffold(
+                topBar = {
+                    LargeTopAppBar(
+                        title = {
+                            Text(text = stringResource(R.string.app_name))
+                        }
+                    )
+                },
+                content = {}
+            )
         }
     }
 }
