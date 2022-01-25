@@ -2,6 +2,7 @@ package com.powilliam.mypackages.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.powilliam.mypackages.data.entity.UserEntity
 import com.powilliam.mypackages.data.repository.AuthRepository
 import com.powilliam.mypackages.data.repository.FeatureFlagRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,10 +11,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PackagesMapUiState(
-    val isSignedIn: Boolean = false,
+    val account: UserEntity? = null,
     val isGettingSignedAccount: Boolean = true,
     val isAuthFeatureEnabled: Boolean = true
 ) {
+    val isSignedIn = account != null
     val canBeginSignIn: Boolean =
         isSignedIn.not() and isGettingSignedAccount.not() and isAuthFeatureEnabled
 }
@@ -33,8 +35,8 @@ class PackagesMapViewModel @Inject constructor(
             authRepository.getAuthenticatedAccount()
                 .onStart { _uiState.update { it.copy(isGettingSignedAccount = true) } }
                 .onCompletion { _uiState.update { it.copy(isGettingSignedAccount = false) } }
-                .collect { user ->
-                    _uiState.update { it.copy(isSignedIn = user != null) }
+                .collect { account ->
+                    _uiState.update { it.copy(account = account) }
                 }
 
             val isAuthFeatureEnabled = featureFlagRepository.isAuthFeatureEnabled()
