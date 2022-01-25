@@ -2,6 +2,7 @@ package com.powilliam.mypackages.ui
 
 import android.app.Application
 import android.util.Log
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
@@ -12,6 +13,7 @@ class MyPackagesApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         onInitializeFirebaseConfig()
+        onEnableDiskPersistence()
     }
 
     private fun onInitializeFirebaseConfig() {
@@ -34,6 +36,10 @@ class MyPackagesApplication : Application() {
                     throwable.message ?: "Failed to fetch and activate remote config"
                 )
             }
+    }
+
+    private fun onEnableDiskPersistence() {
+        Firebase.database.setPersistenceEnabled(true)
     }
 
     companion object {
