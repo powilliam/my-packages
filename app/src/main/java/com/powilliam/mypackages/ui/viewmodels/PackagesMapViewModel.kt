@@ -29,8 +29,7 @@ class PackagesMapViewModel @Inject constructor(
             authRepository.getAuthenticatedAccount()
                 .onStart { _uiState.update { it.copy(isGettingSignedAccount = true) } }
                 .onCompletion { _uiState.update { it.copy(isGettingSignedAccount = false) } }
-                .distinctUntilChanged { old, new -> old?.id === new?.id }
-                .collectLatest { user ->
+                .collect { user ->
                     _uiState.update { it.copy(isSignedIn = user != null) }
                 }
         }
