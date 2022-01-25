@@ -17,7 +17,7 @@ class MyPackagesApplication : Application() {
     private fun onInitializeFirebaseConfig() {
         val remoteConfig = Firebase.remoteConfig
         val settings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 3600
+            minimumFetchIntervalInSeconds = SIX_HOURS_IN_SECONDS
         }
 
         remoteConfig.setConfigSettingsAsync(settings)
@@ -25,7 +25,7 @@ class MyPackagesApplication : Application() {
             .addOnSuccessListener {
                 Log.i(
                     "fetchAndActivate",
-                    "Successfully fetched and activated"
+                    "Successfully fetched and activated. hasFetchedFromRemoteSource: $it"
                 )
             }
             .addOnFailureListener { throwable ->
@@ -34,5 +34,9 @@ class MyPackagesApplication : Application() {
                     throwable.message ?: "Failed to fetch and activate remote config"
                 )
             }
+    }
+
+    companion object {
+        private const val SIX_HOURS_IN_SECONDS = 21600L
     }
 }
