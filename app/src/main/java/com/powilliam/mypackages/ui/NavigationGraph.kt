@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -27,11 +28,14 @@ fun NavigationGraph(beginSignIn: suspend () -> IntentSenderRequest) {
     val navController = rememberNavController()
 
     NavHost(navController, startDestination = Destination.PackagesMap.route) {
-        addPackagesScreen { beginSignIn() }
+        addPackagesScreen(navController) { beginSignIn() }
     }
 }
 
-private fun NavGraphBuilder.addPackagesScreen(beginSignIn: suspend () -> IntentSenderRequest) {
+private fun NavGraphBuilder.addPackagesScreen(
+    navController: NavController,
+    beginSignIn: suspend () -> IntentSenderRequest
+) {
     composable(route = Destination.PackagesMap.route) {
         val context = LocalContext.current
 
@@ -58,7 +62,11 @@ private fun NavGraphBuilder.addPackagesScreen(beginSignIn: suspend () -> IntentS
             }
         }
 
-        PackagesMapScreen()
+        PackagesMapScreen(
+            uiState = uiState,
+            onNavigateToSearchPackageScreen = { navController.navigate(Destination.SearchPackage.route) },
+            onNavigateToAddPackageScreen = { navController.navigate(Destination.AddPackage.route) }
+        )
     }
     composable(route = Destination.Package.route) {
         PackageScreen()
