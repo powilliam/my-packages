@@ -22,6 +22,8 @@ import com.powilliam.mypackages.ui.screens.PackagesMapScreen
 import com.powilliam.mypackages.ui.screens.SearchPackageScreen
 import com.powilliam.mypackages.ui.viewmodels.PackagesMapUiState
 import com.powilliam.mypackages.ui.viewmodels.PackagesMapViewModel
+import com.powilliam.mypackages.ui.viewmodels.SearchPackageUiState
+import com.powilliam.mypackages.ui.viewmodels.SearchPackageViewModel
 
 @Composable
 fun NavigationGraph(beginSignIn: suspend () -> IntentSenderRequest) {
@@ -78,6 +80,13 @@ private fun NavGraphBuilder.addPackagesScreen(
         EditPackageScreen()
     }
     composable(route = Destination.SearchPackage.route) {
-        SearchPackageScreen()
+        val viewModel = hiltViewModel<SearchPackageViewModel>()
+        val uiState by viewModel.uiState.collectAsState(SearchPackageUiState())
+
+        SearchPackageScreen(
+            uiState = uiState,
+            onSearch = viewModel::onSearch,
+            onNavigateToPreviousScreen = { navController.popBackStack() }
+        )
     }
 }
