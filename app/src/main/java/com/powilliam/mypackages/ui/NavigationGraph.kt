@@ -51,7 +51,10 @@ private fun NavGraphBuilder.addPackagesScreen(beginSignIn: suspend () -> IntentS
 
         if (uiState.canBeginSignIn) {
             LaunchedEffect(Unit) {
-                launcher.launch(beginSignIn())
+                try {
+                    launcher.launch(beginSignIn())
+                } catch (_: Exception) {
+                }
             }
         }
 
