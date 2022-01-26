@@ -28,7 +28,8 @@ fun PackagesMapScreen(
     modifier: Modifier = Modifier,
     uiState: PackagesMapUiState,
     onNavigateToSearchPackageScreen: () -> Unit,
-    onNavigateToAddPackageScreen: () -> Unit
+    onNavigateToAddPackageScreen: () -> Unit,
+    onNavigateToPackageScreen: (Package) -> Unit
 ) {
     Box {
         Map(
@@ -59,7 +60,8 @@ fun PackagesMapScreen(
                         )
                     )
                 )
-            )
+            ),
+            onNavigateToPackageScreen = onNavigateToPackageScreen
         )
     }
 }
@@ -115,7 +117,8 @@ private fun BoxScope.PackagesMapScreenAppBar(
 @Composable
 private fun BoxScope.PackagesList(
     modifier: Modifier = Modifier,
-    packages: List<Package> = emptyList()
+    packages: List<Package> = emptyList(),
+    onNavigateToPackageScreen: (Package) -> Unit
 ) {
     HorizontalPager(
         modifier = modifier
@@ -124,7 +127,8 @@ private fun BoxScope.PackagesList(
         count = packages.count()
     ) { position ->
         PackageOnMapCard(
-            entity = packages[position]
+            entity = packages[position],
+            onClick = onNavigateToPackageScreen
         )
     }
 }
