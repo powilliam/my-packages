@@ -20,10 +20,7 @@ import com.powilliam.mypackages.ui.screens.AddPackageScreen
 import com.powilliam.mypackages.ui.screens.EditPackageScreen
 import com.powilliam.mypackages.ui.screens.PackagesMapScreen
 import com.powilliam.mypackages.ui.screens.SearchPackageScreen
-import com.powilliam.mypackages.ui.viewmodels.PackagesMapUiState
-import com.powilliam.mypackages.ui.viewmodels.PackagesMapViewModel
-import com.powilliam.mypackages.ui.viewmodels.SearchPackageUiState
-import com.powilliam.mypackages.ui.viewmodels.SearchPackageViewModel
+import com.powilliam.mypackages.ui.viewmodels.*
 
 @Composable
 fun NavigationGraph(beginSignIn: suspend () -> IntentSenderRequest) {
@@ -88,7 +85,26 @@ private fun NavGraphBuilder.addPackagesScreen(
         )
     }
     composable(route = Destination.AddPackage.route) {
-        AddPackageScreen()
+        val viewModel = hiltViewModel<AddPackageViewModel>()
+        val uiState by viewModel.uiState.collectAsState(AddPackageUiState())
+
+        AddPackageScreen(
+            uiState = uiState,
+            onChangePackageName = { newValue ->
+                viewModel.onChangeFormFieldValue(
+                    FormField.PackageName,
+                    newValue
+                )
+            },
+            onChangePackageTracker = { newValue ->
+                viewModel.onChangeFormFieldValue(
+                    FormField.PackageTracker,
+                    newValue
+                )
+            },
+            onNavigateToPreviousScreen = { navController.popBackStack() },
+            onSubmit = { navController.popBackStack() }
+        )
     }
     composable(route = Destination.EditPackage.route) {
         EditPackageScreen()
