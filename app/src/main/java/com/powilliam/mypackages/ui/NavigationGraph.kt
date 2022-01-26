@@ -67,11 +67,25 @@ private fun NavGraphBuilder.addPackagesScreen(
         PackagesMapScreen(
             uiState = uiState,
             onNavigateToSearchPackageScreen = { navController.navigate(Destination.SearchPackage.route) },
-            onNavigateToAddPackageScreen = { navController.navigate(Destination.AddPackage.route) }
+            onNavigateToAddPackageScreen = { navController.navigate(Destination.AddPackage.route) },
+            onNavigateToPackageScreen = {
+                navController.navigate(
+                    // TODO: Create an method to replace it
+                    Destination.Package.route.replace(
+                        "{packageId}",
+                        "0"
+                    )
+                )
+            }
         )
     }
     composable(route = Destination.Package.route) {
-        PackageScreen()
+        PackageScreen(
+            onNavigateToPreviousScreen = { navController.popBackStack() },
+            onNavigateToEditPackageScreen = { navController.navigate(Destination.EditPackage.route) },
+            onDeletePackage = {},
+            onMarkPackageAsReceived = {}
+        )
     }
     composable(route = Destination.AddPackage.route) {
         AddPackageScreen()
