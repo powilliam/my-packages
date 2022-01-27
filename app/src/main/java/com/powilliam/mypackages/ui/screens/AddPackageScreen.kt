@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.google.accompanist.insets.statusBarsPadding
 import com.powilliam.mypackages.ui.composables.FormTextField
+import com.powilliam.mypackages.ui.validators.ValidationResult
 import com.powilliam.mypackages.ui.viewmodels.AddPackageUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,7 +31,10 @@ fun AddPackageScreen(
                 value = uiState.packageName,
                 placeholder = "Adicionar um nome para o pacote",
                 label = "Nome do pacote",
-                onValueChange = onChangePackageName
+                onValueChange = onChangePackageName,
+                error = if (uiState.hasValidName is ValidationResult.InValid) {
+                    { Text(text = uiState.hasValidName.reason) }
+                } else null
             )
             FormTextField(
                 value = uiState.packageTracker,
@@ -39,7 +43,10 @@ fun AddPackageScreen(
                 onValueChange = onChangePackageTracker,
                 icon = {
                     Icon(imageVector = Icons.Rounded.Tag, contentDescription = null)
-                }
+                },
+                error = if (uiState.hasValidTracker is ValidationResult.InValid) {
+                    { Text(text = uiState.hasValidTracker.reason) }
+                } else null
             )
         }
     }

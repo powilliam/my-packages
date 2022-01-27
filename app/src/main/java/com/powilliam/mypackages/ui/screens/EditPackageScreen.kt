@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.google.accompanist.insets.statusBarsPadding
 import com.powilliam.mypackages.ui.composables.FormTextField
+import com.powilliam.mypackages.ui.validators.ValidationResult
 import com.powilliam.mypackages.ui.viewmodels.EditPackageUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +35,10 @@ fun EditPackageScreen(
                 value = uiState.packageName,
                 placeholder = "Adicione um nome para o pacote",
                 label = "Nome do pacote",
-                onValueChange = onChangePackageName
+                onValueChange = onChangePackageName,
+                error = if (uiState.hasValidName is ValidationResult.InValid) {
+                    { Text(text = uiState.hasValidName.reason) }
+                } else null
             )
         }
     }
