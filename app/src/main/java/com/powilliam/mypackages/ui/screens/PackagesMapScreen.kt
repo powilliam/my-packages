@@ -100,14 +100,12 @@ private fun BoxScope.PackagesMapScreenAppBar(
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
-            if (isSignedIn) {
-                IconButton(onClick = onNavigateToAddPackageScreen) {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+            IconButton(onClick = onNavigateToAddPackageScreen) {
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     )
