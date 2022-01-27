@@ -1,12 +1,10 @@
 package com.powilliam.mypackages.di
 
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.powilliam.mypackages.data.datasource.AuthRemoteDataSource
-import com.powilliam.mypackages.data.datasource.AuthRemoteDataSourceImpl
-import com.powilliam.mypackages.data.datasource.FeatureFlagRemoteDataSource
-import com.powilliam.mypackages.data.datasource.FeatureFlagRemoteDataSourceImpl
+import com.powilliam.mypackages.data.datasource.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,4 +23,9 @@ object DataSourceModule {
     @Provides
     fun provideFeatureFlagRemoteDataSource(): FeatureFlagRemoteDataSource =
         FeatureFlagRemoteDataSourceImpl(Firebase.remoteConfig)
+
+    @Singleton
+    @Provides
+    fun providePackageRemoteDataSource(): PackageRemoteDataSource =
+        PackageRemoteDataSourceImpl(Firebase.database.reference)
 }
