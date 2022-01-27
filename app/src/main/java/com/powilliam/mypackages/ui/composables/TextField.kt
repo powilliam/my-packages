@@ -80,7 +80,8 @@ fun FormTextField(
     placeholder: String,
     label: String,
     onValueChange: (String) -> Unit,
-    icon: (@Composable () -> Unit)? = null
+    icon: (@Composable () -> Unit)? = null,
+    error: (@Composable () -> Unit)? = null
 ) {
     val focus = LocalFocusManager.current
     val softwareKeyboardController = LocalSoftwareKeyboardController.current
@@ -128,6 +129,13 @@ fun FormTextField(
                                         text = placeholder,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
+                                }
+                            }
+                            error?.let { composable ->
+                                Box(modifier.padding(top = 8.dp)) {
+                                    ProvideTextStyle(MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.error)) {
+                                        composable()
+                                    }
                                 }
                             }
                         }
