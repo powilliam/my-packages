@@ -103,7 +103,10 @@ private fun NavGraphBuilder.addPackagesScreen(
                 )
             },
             onNavigateToPreviousScreen = { navController.popBackStack() },
-            onSubmit = { navController.popBackStack() }
+            onSubmit = {
+                viewModel.onSubmit()
+                navController.popBackStack()
+            }
         )
     }
     composable(route = Destination.EditPackage.route) {
