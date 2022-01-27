@@ -107,7 +107,15 @@ private fun NavGraphBuilder.addPackagesScreen(
         )
     }
     composable(route = Destination.EditPackage.route) {
-        EditPackageScreen()
+        val viewModel = hiltViewModel<EditPackageViewModel>()
+        val uiState by viewModel.uiState.collectAsState(EditPackageUiState())
+
+        EditPackageScreen(
+            uiState = uiState,
+            onNavigateToPreviousScreen = { navController.popBackStack() },
+            onChangePackageName = viewModel::onChangePackageName,
+            onSubmit = { navController.popBackStack() }
+        )
     }
     composable(route = Destination.SearchPackage.route) {
         val viewModel = hiltViewModel<SearchPackageViewModel>()
