@@ -2,10 +2,9 @@ package com.powilliam.mypackages.di
 
 import com.powilliam.mypackages.data.datasource.AuthRemoteDataSource
 import com.powilliam.mypackages.data.datasource.FeatureFlagRemoteDataSource
-import com.powilliam.mypackages.data.repository.AuthRepository
-import com.powilliam.mypackages.data.repository.AuthRepositoryImpl
-import com.powilliam.mypackages.data.repository.FeatureFlagRepository
-import com.powilliam.mypackages.data.repository.FeatureFlagRepositoryImpl
+import com.powilliam.mypackages.data.datasource.PackageRemoteDataSource
+import com.powilliam.mypackages.data.mappers.PackageMapper
+import com.powilliam.mypackages.data.repository.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,4 +24,16 @@ object RepositoryModule {
     fun provideFeatureFlagRepository(
         featureFlagRemoteDataSource: FeatureFlagRemoteDataSource
     ): FeatureFlagRepository = FeatureFlagRepositoryImpl(featureFlagRemoteDataSource)
+
+    @Singleton
+    @Provides
+    fun providePackageRepository(
+        authRemoteDataSource: AuthRemoteDataSource,
+        packageRemoteDataSource: PackageRemoteDataSource,
+        packageMapper: PackageMapper
+    ): PackageRepository = PackageRepositoryImpl(
+        authRemoteDataSource,
+        packageRemoteDataSource,
+        packageMapper
+    )
 }
