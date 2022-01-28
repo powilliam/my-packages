@@ -48,6 +48,12 @@ class PackagesMapViewModel @Inject constructor(
     }
 
     fun onAuthenticateWithGoogleSignIn(idToken: String?) = viewModelScope.launch {
-        authRepository.authenticateWithGoogleSignIn(idToken)
+        authRepository.authenticateWithGoogleSignIn(idToken)?.let { account ->
+            _uiState.update { it.copy(account = account) }
+        }
+    }
+
+    fun onSignOut() = viewModelScope.launch {
+        authRepository.unAuthenticate()
     }
 }
