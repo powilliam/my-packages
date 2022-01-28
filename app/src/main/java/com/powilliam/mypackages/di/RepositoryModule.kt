@@ -3,7 +3,6 @@ package com.powilliam.mypackages.di
 import com.powilliam.mypackages.data.datasource.AuthRemoteDataSource
 import com.powilliam.mypackages.data.datasource.FeatureFlagRemoteDataSource
 import com.powilliam.mypackages.data.datasource.PackageRemoteDataSource
-import com.powilliam.mypackages.data.mappers.PackageMapper
 import com.powilliam.mypackages.data.repository.*
 import dagger.Module
 import dagger.Provides
@@ -30,10 +29,8 @@ object RepositoryModule {
     fun providePackageRepository(
         authRemoteDataSource: AuthRemoteDataSource,
         packageRemoteDataSource: PackageRemoteDataSource,
-        packageMapper: PackageMapper
     ): PackageRepository = PackageRepositoryImpl(
         authRemoteDataSource,
         packageRemoteDataSource,
-        packageMapper
     )
 }
