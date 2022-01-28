@@ -1,11 +1,14 @@
 package com.powilliam.mypackages.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import com.powilliam.mypackages.data.entity.Package
 import com.powilliam.mypackages.ui.composables.AppBarTextField
 import com.powilliam.mypackages.ui.composables.Package
 import com.powilliam.mypackages.ui.viewmodels.SearchPackageUiState
@@ -15,7 +18,8 @@ import com.powilliam.mypackages.ui.viewmodels.SearchPackageUiState
 fun SearchPackageScreen(
     uiState: SearchPackageUiState = SearchPackageUiState(),
     onSearch: (String) -> Unit,
-    onNavigateToPreviousScreen: () -> Unit
+    onNavigateToPreviousScreen: () -> Unit,
+    onNavigateToPackageScreen: (Package) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -26,10 +30,14 @@ fun SearchPackageScreen(
             )
         },
     ) {
-        // TODO: Show all packages inside one LazyColumn
-        Column {
-            Package(tracker = { Text(text = "1234567676") }) {
-                Text(text = "Meu pacote")
+        LazyColumn {
+            items(uiState.packages, key = { it.tracker }) { entity ->
+                Package(
+                    tracker = { Text(text = entity.tracker) },
+                    onClick = { onNavigateToPackageScreen(entity) }
+                ) {
+                    Text(text = entity.name)
+                }
             }
         }
     }

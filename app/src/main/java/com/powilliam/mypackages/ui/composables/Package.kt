@@ -36,14 +36,15 @@ fun PackageOnMapCard(
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 2.dp
     ) {
-        Column(modifier.clickable { onClick(entity) }) {
+        Column {
             Package(
                 tracker = {
                     Text(text = entity.tracker)
                 },
                 name = {
                     Text(text = entity.name)
-                }
+                },
+                onClick = { onClick(entity) }
             )
             entity.events.firstOrNull()?.let { latestEvent ->
                 Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12F))
@@ -117,12 +118,14 @@ fun PackageCard(entity: Package) {
 @Composable
 fun Package(
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
     tracker: @Composable () -> Unit,
-    name: @Composable () -> Unit
+    name: @Composable () -> Unit,
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .clickable { onClick() }
             .padding(16.dp)
     ) {
         ProvideTextStyle(MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.outline)) {
