@@ -3,10 +3,7 @@ package com.powilliam.mypackages.ui
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -21,6 +18,7 @@ import com.powilliam.mypackages.ui.screens.EditPackageScreen
 import com.powilliam.mypackages.ui.screens.PackagesMapScreen
 import com.powilliam.mypackages.ui.screens.SearchPackageScreen
 import com.powilliam.mypackages.ui.viewmodels.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun NavigationGraph(beginSignIn: suspend () -> IntentSenderRequest) {
@@ -40,6 +38,7 @@ private fun NavGraphBuilder.addPackagesScreen(
 
         val viewModel = hiltViewModel<PackagesMapViewModel>()
         val uiState by viewModel.uiState.collectAsState(PackagesMapUiState())
+        val coroutineScope = rememberCoroutineScope()
         val launcher = rememberLauncherForActivityResult(
             ActivityResultContracts.StartIntentSenderForResult()
         ) { result ->
@@ -51,28 +50,47 @@ private fun NavGraphBuilder.addPackagesScreen(
             } catch (_: Exception) {
             }
         }
-
-        if (uiState.canBeginSignIn) {
-            LaunchedEffect(Unit) {
+        val launchSignIn = {
+            coroutineScope.launch {
                 try {
                     launcher.launch(beginSignIn())
-                } catch (_: Exception) {
+                } catch (e: Exception) {
                 }
             }
         }
 
         PackagesMapScreen(
             uiState = uiState,
-            onNavigateToSearchPackageScreen = { navController.navigate(Destination.SearchPackage.route) },
-            onNavigateToAddPackageScreen = { navController.navigate(Destination.AddPackage.route) },
-            onNavigateToPackageScreen = {
-                navController.navigate(
-                    // TODO: Create an method to replace it
-                    Destination.Package.route.replace(
-                        "{packageId}",
-                        "0"
+            onChangeAccount = { launchSignIn() },
+            onSignOut = { viewModel.onSignOut() },
+            onNavigateToSearchPackageScreen = {
+                if (uiState.shouldPromptSignIn) {
+                    launchSignIn()
+                } else {
+                    navController.navigate(
+                        Destination.SearchPackage.route
                     )
-                )
+                }
+            },
+            onNavigateToAddPackageScreen = {
+                if (uiState.shouldPromptSignIn) {
+                    launchSignIn()
+                } else {
+                    navController.navigate(Destination.AddPackage.route)
+                }
+            },
+            onNavigateToPackageScreen = {
+                if (uiState.shouldPromptSignIn) {
+                    launchSignIn()
+                } else {
+                    navController.navigate(
+                        // TODO: Create an method to replace it
+                        Destination.Package.route.replace(
+                            "{packageId}",
+                            "0"
+                        )
+                    )
+                }
             }
         )
     }

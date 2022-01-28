@@ -12,39 +12,48 @@ import javax.inject.Inject
 
 data class PackagesMapUiState(
     val account: UserEntity? = null,
-    val isGettingSignedAccount: Boolean = true,
-    val isAuthFeatureEnabled: Boolean = true
+    val isAuthFeatureEnabled: Boolean = true,
 ) {
     val isSignedIn = account != null
-    val canBeginSignIn: Boolean =
-        isSignedIn.not() and isGettingSignedAccount.not() and isAuthFeatureEnabled
+    val shouldPromptSignIn = isSignedIn.not() and isAuthFeatureEnabled
 }
 
 @HiltViewModel
 class PackagesMapViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val featureFlagRepository: FeatureFlagRepository
+    private val featureFlagRepository: FeatureFlagRepository,
 ) : ViewModel() {
-    private val _uiState: MutableStateFlow<PackagesMapUiState> =
-        MutableStateFlow(PackagesMapUiState())
+    private val _uiState: MutableStateFlow<PackagesMapUiState> = MutableStateFlow(
+        PackagesMapUiState()
+    )
     val uiState: SharedFlow<PackagesMapUiState> =
         _uiState.shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
     init {
         viewModelScope.launch {
+            featureFlagRepository.isAuthFeatureEnabled()
+                .distinctUntilChanged()
+                .collectLatest { isFeatureEnabled ->
+                    _uiState.update { it.copy(isAuthFeatureEnabled = isFeatureEnabled) }
+                }
+        }
+
+        viewModelScope.launch {
             authRepository.getAuthenticatedAccount()
-                .onStart { _uiState.update { it.copy(isGettingSignedAccount = true) } }
-                .onCompletion { _uiState.update { it.copy(isGettingSignedAccount = false) } }
-                .collect { account ->
+                .distinctUntilChanged { old, new -> old?.id == new?.id }
+                .collectLatest { account ->
                     _uiState.update { it.copy(account = account) }
                 }
-
-            val isAuthFeatureEnabled = featureFlagRepository.isAuthFeatureEnabled()
-            _uiState.update { it.copy(isAuthFeatureEnabled = isAuthFeatureEnabled) }
         }
     }
 
     fun onAuthenticateWithGoogleSignIn(idToken: String?) = viewModelScope.launch {
-        authRepository.authenticateWithGoogleSignIn(idToken)
+        authRepository.authenticateWithGoogleSignIn(idToken)?.let { account ->
+            _uiState.update { it.copy(account = account) }
+        }
+    }
+
+    fun onSignOut() = viewModelScope.launch {
+        authRepository.unAuthenticate()
     }
 }
