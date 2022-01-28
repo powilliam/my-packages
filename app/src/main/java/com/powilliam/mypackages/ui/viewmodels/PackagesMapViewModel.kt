@@ -31,9 +31,14 @@ class PackagesMapViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val isAuthFeatureEnabled = featureFlagRepository.isAuthFeatureEnabled()
-            _uiState.update { it.copy(isAuthFeatureEnabled = isAuthFeatureEnabled) }
+            featureFlagRepository.isAuthFeatureEnabled()
+                .distinctUntilChanged()
+                .collectLatest { isFeatureEnabled ->
+                    _uiState.update { it.copy(isAuthFeatureEnabled = isFeatureEnabled) }
+                }
+        }
 
+        viewModelScope.launch {
             authRepository.getAuthenticatedAccount()
                 .distinctUntilChanged { old, new -> old?.id == new?.id }
                 .collectLatest { account ->
