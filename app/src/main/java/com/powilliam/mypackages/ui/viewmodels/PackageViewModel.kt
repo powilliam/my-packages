@@ -28,10 +28,4 @@ class PackageViewModel @Inject constructor(
                 }
         }
     }
-
-    fun onPermanentlyDelete() {
-        viewModelScope.launch {
-            packageRepository.remove(_uiState.value.entity!!.tracker)
-        }
-    }
 }

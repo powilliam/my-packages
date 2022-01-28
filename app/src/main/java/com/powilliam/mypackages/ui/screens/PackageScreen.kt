@@ -28,7 +28,6 @@ fun PackageScreen(
     uiState: PackageUiState = PackageUiState(),
     onNavigateToPreviousScreen: () -> Unit,
     onNavigateToEditPackageScreen: () -> Unit,
-    onPermanentlyDelete: () -> Unit,
     onMarkPackageAsReceived: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -38,7 +37,6 @@ fun PackageScreen(
             PackageScreenAppBar(
                 onNavigateToPreviousScreen,
                 onNavigateToEditPackageScreen,
-                onPermanentlyDelete
             )
         },
         floatingActionButton = {
@@ -72,7 +70,6 @@ fun PackageScreen(
 private fun PackageScreenAppBar(
     onNavigateToPreviousScreen: () -> Unit,
     onNavigateToEditPackageScreen: () -> Unit,
-    onPermanentlyDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     SmallTopAppBar(
@@ -86,9 +83,6 @@ private fun PackageScreenAppBar(
         actions = {
             IconButton(onClick = onNavigateToEditPackageScreen) {
                 Icon(imageVector = Icons.Rounded.Edit, contentDescription = null)
-            }
-            IconButton(onClick = onPermanentlyDelete) {
-                Icon(imageVector = Icons.Rounded.DeleteForever, contentDescription = null)
             }
         }
     )

@@ -125,10 +125,6 @@ private fun NavGraphBuilder.addPackagesScreen(
                     )
                 }
             },
-            onPermanentlyDelete = {
-                viewModel.onPermanentlyDelete()
-                navController.popBackStack()
-            },
             onMarkPackageAsReceived = {}
         )
     }

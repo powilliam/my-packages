@@ -14,7 +14,6 @@ interface PackageRemoteDataSource {
     suspend fun one(userId: String, tracker: String): Flow<Map<String, Any?>>
     suspend fun insert(userId: String, newPackage: Map<String, Any?>)
     suspend fun update(userId: String, tracker: String, newName: String)
-    suspend fun remove(userId: String, tracker: String)
 }
 
 class PackageRemoteDataSourceImpl @Inject constructor(
@@ -49,12 +48,6 @@ class PackageRemoteDataSourceImpl @Inject constructor(
     override suspend fun update(userId: String, tracker: String, newName: String) {
         withContext(Dispatchers.IO) {
             reference(userId).child(tracker).child("name").setValue(newName)
-        }
-    }
-
-    override suspend fun remove(userId: String, tracker: String) {
-        withContext(Dispatchers.IO) {
-            reference(userId).child(tracker).removeValue()
         }
     }
 
