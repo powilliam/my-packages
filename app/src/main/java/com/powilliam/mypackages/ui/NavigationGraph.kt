@@ -64,7 +64,7 @@ private fun NavGraphBuilder.addPackagesScreen(
         if (uiState.shouldPromptSignIn) {
             LaunchedEffect(Unit) {
                 snapshotFlow { uiState.shouldPromptSignIn }
-                    .onEach { delay(1500L) }
+                    .onEach { delay(100L) }
                     .collectLatest { shouldPrompt -> if (shouldPrompt) launchSignIn() }
             }
         }
