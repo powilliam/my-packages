@@ -1,6 +1,5 @@
 package com.powilliam.mypackages.data.repository
 
-import com.google.firebase.auth.AuthResult
 import com.powilliam.mypackages.data.datasource.AuthProvider
 import com.powilliam.mypackages.data.datasource.AuthRemoteDataSource
 import com.powilliam.mypackages.data.entity.UserEntity
@@ -10,7 +9,7 @@ import javax.inject.Inject
 
 interface AuthRepository {
     suspend fun getAuthenticatedAccount(): Flow<UserEntity?>
-    suspend fun authenticateWithGoogleSignIn(idToken: String?): AuthResult
+    suspend fun authenticateWithGoogleSignIn(idToken: String?): UserEntity?
     suspend fun unAuthenticate()
 }
 
@@ -23,8 +22,14 @@ class AuthRepositoryImpl @Inject constructor(
             UserEntity(id = account.uid, email = account.email, avatar = account.photoUrl)
         }
 
-    override suspend fun authenticateWithGoogleSignIn(idToken: String?) =
-        authRemoteDataSource.authenticate(AuthProvider.GoogleProvider(idToken))
+    override suspend fun authenticateWithGoogleSignIn(idToken: String?): UserEntity? {
+        val result = authRemoteDataSource.authenticate(AuthProvider.GoogleProvider(idToken))
+        return if (result.user != null) UserEntity(
+            id = result.user!!.uid,
+            email = result.user!!.email,
+            avatar = result.user!!.photoUrl
+        ) else null
+    }
 
     override suspend fun unAuthenticate() =
         authRemoteDataSource.unAuthenticate()

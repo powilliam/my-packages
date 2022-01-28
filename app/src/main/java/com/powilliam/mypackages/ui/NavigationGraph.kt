@@ -18,8 +18,6 @@ import com.powilliam.mypackages.ui.screens.EditPackageScreen
 import com.powilliam.mypackages.ui.screens.PackagesMapScreen
 import com.powilliam.mypackages.ui.screens.SearchPackageScreen
 import com.powilliam.mypackages.ui.viewmodels.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 @Composable
@@ -61,16 +59,10 @@ private fun NavGraphBuilder.addPackagesScreen(
             }
         }
 
-        if (uiState.shouldPromptSignIn) {
-            LaunchedEffect(Unit) {
-                snapshotFlow { uiState.shouldPromptSignIn }
-                    .onEach { delay(100L) }
-                    .collectLatest { shouldPrompt -> if (shouldPrompt) launchSignIn() }
-            }
-        }
-
         PackagesMapScreen(
             uiState = uiState,
+            onChangeAccount = { launchSignIn() },
+            onSignOut = { viewModel.onSignOut() },
             onNavigateToSearchPackageScreen = {
                 if (uiState.shouldPromptSignIn) {
                     launchSignIn()
