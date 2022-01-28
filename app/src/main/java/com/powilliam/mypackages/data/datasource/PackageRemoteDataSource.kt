@@ -1,39 +1,35 @@
 package com.powilliam.mypackages.data.datasource
 
 import com.google.firebase.database.*
-import com.google.firebase.database.ktx.getValue
 import com.powilliam.mypackages.data.constants.FirebaseReferences
+import com.powilliam.mypackages.utils.asRealtimeFlow
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 interface PackageRemoteDataSource {
     suspend fun all(userId: String): Flow<Map<String, Any?>>
+    suspend fun one(userId: String, tracker: String): Flow<Map<String, Any?>>
     suspend fun insert(userId: String, newPackage: Map<String, Any?>)
+    suspend fun remove(userId: String, tracker: String)
 }
 
 class PackageRemoteDataSourceImpl @Inject constructor(
     private val realtimeDatabase: DatabaseReference,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Job() + Dispatchers.IO)
 ) : PackageRemoteDataSource {
     @OptIn(ExperimentalCoroutinesApi::class)
-    override suspend fun all(userId: String): Flow<Map<String, Any?>> = callbackFlow {
-        val listener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val packages = snapshot.getValue<Map<String, Any>>() ?: return
-                coroutineScope.launch {
-                    send(packages)
-                }
-            }
+    override suspend fun all(userId: String): Flow<Map<String, Any?>> =
+        reference(userId)
+            .asRealtimeFlow<Map<String, Any?>>()
+            .flowOn(Dispatchers.IO)
 
-            override fun onCancelled(error: DatabaseError) = cancel()
-        }
-        reference(userId).addValueEventListener(listener)
-        awaitClose { reference(userId).removeEventListener(listener) }
-    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun one(userId: String, tracker: String): Flow<Map<String, Any?>> =
+        reference(userId).child(tracker)
+            .asRealtimeFlow<Map<String, Any?>>()
+            .flowOn(Dispatchers.IO)
 
     override suspend fun insert(userId: String, newPackage: Map<String, Any?>) {
         withContext(Dispatchers.IO) {
@@ -46,6 +42,12 @@ class PackageRemoteDataSourceImpl @Inject constructor(
             if (insertedPackages.isNullOrEmpty()) {
                 packageReference.setValue(newPackage)
             }
+        }
+    }
+
+    override suspend fun remove(userId: String, tracker: String) {
+        withContext(Dispatchers.IO) {
+            reference(userId).child(tracker).removeValue()
         }
     }
 

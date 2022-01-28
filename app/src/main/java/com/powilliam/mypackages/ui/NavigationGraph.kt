@@ -8,9 +8,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.google.android.gms.auth.api.identity.Identity
 import com.powilliam.mypackages.ui.screens.PackageScreen
 import com.powilliam.mypackages.ui.screens.AddPackageScreen
@@ -86,19 +88,39 @@ private fun NavGraphBuilder.addPackagesScreen(
                     navController.navigate(
                         // TODO: Create an method to replace it
                         Destination.Package.route.replace(
-                            "{packageId}",
-                            "0"
+                            "{tracker}",
+                            it.tracker
                         )
                     )
                 }
             }
         )
     }
-    composable(route = Destination.Package.route) {
+    composable(
+        route = Destination.Package.route,
+        arguments = listOf(
+            navArgument("tracker") {
+                type = NavType.StringType
+            }
+        )
+    ) { navBackStackEntry ->
+        val viewModel = hiltViewModel<PackageViewModel>()
+        val uiState by viewModel.uiState.collectAsState(PackageUiState())
+
+        navBackStackEntry.arguments?.getString("tracker")?.let { tracker ->
+            LaunchedEffect(Unit) {
+                viewModel.onPopulateScreen(tracker)
+            }
+        }
+
         PackageScreen(
+            uiState = uiState,
             onNavigateToPreviousScreen = { navController.popBackStack() },
             onNavigateToEditPackageScreen = { navController.navigate(Destination.EditPackage.route) },
-            onDeletePackage = {},
+            onPermanentlyDelete = {
+                viewModel.onPermanentlyDelete()
+                navController.popBackStack()
+            },
             onMarkPackageAsReceived = {}
         )
     }
