@@ -19,14 +19,16 @@ import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import com.powilliam.mypackages.ui.composables.EventsCard
 import com.powilliam.mypackages.ui.composables.PackageCard
+import com.powilliam.mypackages.ui.viewmodels.PackageUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PackageScreen(
     modifier: Modifier = Modifier,
+    uiState: PackageUiState = PackageUiState(),
     onNavigateToPreviousScreen: () -> Unit,
     onNavigateToEditPackageScreen: () -> Unit,
-    onDeletePackage: () -> Unit,
+    onPermanentlyDelete: () -> Unit,
     onMarkPackageAsReceived: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -36,7 +38,7 @@ fun PackageScreen(
             PackageScreenAppBar(
                 onNavigateToPreviousScreen,
                 onNavigateToEditPackageScreen,
-                onDeletePackage
+                onPermanentlyDelete
             )
         },
         floatingActionButton = {
@@ -58,8 +60,10 @@ fun PackageScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            PackageCard()
-            EventsCard()
+            uiState.entity?.let { entity ->
+                PackageCard(entity)
+                EventsCard(events = entity.events)
+            }
         }
     }
 }
@@ -68,7 +72,7 @@ fun PackageScreen(
 private fun PackageScreenAppBar(
     onNavigateToPreviousScreen: () -> Unit,
     onNavigateToEditPackageScreen: () -> Unit,
-    onDeletePackage: () -> Unit,
+    onPermanentlyDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     SmallTopAppBar(
@@ -83,7 +87,7 @@ private fun PackageScreenAppBar(
             IconButton(onClick = onNavigateToEditPackageScreen) {
                 Icon(imageVector = Icons.Rounded.Edit, contentDescription = null)
             }
-            IconButton(onClick = onDeletePackage) {
+            IconButton(onClick = onPermanentlyDelete) {
                 Icon(imageVector = Icons.Rounded.DeleteForever, contentDescription = null)
             }
         }
