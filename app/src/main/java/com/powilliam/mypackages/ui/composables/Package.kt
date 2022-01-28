@@ -3,6 +3,8 @@ package com.powilliam.mypackages.ui.composables
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -17,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.powilliam.mypackages.data.entity.Event
 import com.powilliam.mypackages.data.entity.Package
 
 @Composable
@@ -67,66 +70,44 @@ fun PackageOnMapCard(
 }
 
 @Composable
-fun PackageCard() {
+fun PackageCard(entity: Package) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Column {
             Package(
-                tracker = { Text(text = "123124124124") }
+                tracker = { Text(text = entity.tracker) }
             ) {
-                Text(text = "Meu pacote")
+                Text(text = entity.name)
             }
             Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f))
-            PackageDetails {
-                PackageDetail(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Schedule,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                    },
-                    label = { Text(text = "Previsão de entrega") }
-                ) {
-                    Text(text = "Daqui 12 dias")
-                }
-                PackageDetail(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Map,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                    },
-                    label = { Text(text = "Último evento") }
-                ) {
-                    Text(text = "Em trânsito para Agência dos Correios - Curitiba")
-                }
-                PackageDetail(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Place,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                    },
-                    label = { Text(text = "Última localização") }
-                ) {
-                    Text(text = "Unidade de distribuição - Curitiba")
-                }
-                PackageDetail(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Rounded.Update,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                    },
-                    label = { Text(text = "Última atualização") }
-                ) {
-                    Text(text = "Há 20 minutos")
+            entity.events.firstOrNull()?.let { event ->
+                PackageDetails {
+                    PackageDetail(
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Map,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
+                        },
+                        label = { Text(text = "Último evento") }
+                    ) {
+                        Text(text = "${event.description} - ${event.location.address.city}, ${event.location.address.province}")
+                    }
+                    PackageDetail(
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Place,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
+                        },
+                        label = { Text(text = "Última localização") }
+                    ) {
+                        Text(text = "${event.location.type} - ${event.location.address.city}, ${event.location.address.province}")
+                    }
                 }
             }
         }
@@ -195,43 +176,30 @@ fun PackageDetail(
 }
 
 @Composable
-fun EventsCard(modifier: Modifier = Modifier) {
+fun EventsCard(modifier: Modifier = Modifier, events: List<Event> = emptyList()) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         color = MaterialTheme.colorScheme.surface
     ) {
-        Column {
-            PackageDetail(
-                iconSize = 40.dp,
-                icon = {
-                    Avatar(color = MaterialTheme.colorScheme.tertiary) {
-                        Text(
-                            modifier = modifier.align(Alignment.Center),
-                            text = "01",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                },
-                label = { Text(text = "OBJETO POSTADO") }
-            ) {
-                Text(text = "Agência dos Correios - Curitiba")
-            }
-            PackageDetail(
-                iconSize = 40.dp,
-                icon = {
-                    Avatar(color = MaterialTheme.colorScheme.tertiary) {
-                        Text(
-                            modifier = modifier.align(Alignment.Center),
-                            text = "02",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                },
-                label = { Text(text = "OBJETO POSTADO") }
-            ) {
-                Text(text = "Agência dos Correios - Curitiba")
+        LazyColumn {
+            itemsIndexed(events) { position, event ->
+                PackageDetail(
+                    iconSize = 40.dp,
+                    icon = {
+                        Avatar(color = MaterialTheme.colorScheme.tertiary) {
+                            Text(
+                                modifier = modifier.align(Alignment.Center),
+                                text = "${position.plus(1)}",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    },
+                    label = { Text(text = event.description) }
+                ) {
+                    Text(text = "${event.location.type} - ${event.location.address.city}, ${event.location.address.province}")
+                }
             }
         }
     }

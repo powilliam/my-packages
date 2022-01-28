@@ -1,6 +1,5 @@
 package com.powilliam.mypackages.data.repository
 
-import android.util.Log
 import com.powilliam.mypackages.data.datasource.AuthRemoteDataSource
 import com.powilliam.mypackages.data.datasource.PackageRemoteDataSource
 import com.powilliam.mypackages.data.entity.Package
@@ -9,7 +8,9 @@ import javax.inject.Inject
 
 interface PackageRepository {
     suspend fun all(): Flow<List<Package>>
+    suspend fun one(tracker: String): Flow<Package>
     suspend fun insert(newPackage: Package)
+    suspend fun remove(tracker: String)
 }
 
 class PackageRepositoryImpl @Inject constructor(
@@ -24,8 +25,19 @@ class PackageRepositoryImpl @Inject constructor(
             .filter { packages -> packages.all { pkg -> pkg.events.isNotEmpty() } }
     }
 
+    override suspend fun one(tracker: String): Flow<Package> {
+        val account = authRemoteDataSource.getAuthenticatedAccount() ?: return emptyFlow()
+        return packageRemoteDataSource.one(account.uid, tracker)
+            .map { entity -> Package.fromMap(entity) }
+    }
+
     override suspend fun insert(newPackage: Package) {
         val account = authRemoteDataSource.getAuthenticatedAccount() ?: return
         packageRemoteDataSource.insert(account.uid, newPackage.toMap())
+    }
+
+    override suspend fun remove(tracker: String) {
+        val account = authRemoteDataSource.getAuthenticatedAccount() ?: return
+        packageRemoteDataSource.remove(account.uid, tracker)
     }
 }
