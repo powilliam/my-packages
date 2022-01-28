@@ -89,20 +89,7 @@ fun PackagesMapScreen(
                 onNavigateToAddPackageScreen = onNavigateToAddPackageScreen
             )
             PackagesList(
-                packages = listOf(
-                    Package(
-                        name = "Meu pacote", tracker = "OQ143631625BR", events = listOf(
-                            Event(
-                                type = EventType.BDE,
-                                description = "Objeto entregue ao destinatário",
-                                location = Location(
-                                    type = "Agência dos Correios",
-                                    address = Address(city = "Humaita", province = "AM"),
-                                )
-                            )
-                        )
-                    )
-                ),
+                packages = uiState.packages,
                 onNavigateToPackageScreen = onNavigateToPackageScreen
             )
         }
