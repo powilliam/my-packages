@@ -26,7 +26,7 @@ fun EditPackageScreen(
                 onNavigateToPreviousScreen = onNavigateToPreviousScreen,
                 onSubmit = onSubmit
             ) {
-                Text(text = "12412412125124")
+                Text(text = uiState.packageTracker)
             }
         }
     ) {

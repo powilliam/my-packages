@@ -116,7 +116,15 @@ private fun NavGraphBuilder.addPackagesScreen(
         PackageScreen(
             uiState = uiState,
             onNavigateToPreviousScreen = { navController.popBackStack() },
-            onNavigateToEditPackageScreen = { navController.navigate(Destination.EditPackage.route) },
+            onNavigateToEditPackageScreen = {
+                uiState.entity?.let { entity ->
+                    navController.navigate(
+                        Destination.EditPackage.route
+                            .replace("{tracker}", entity.tracker)
+                            .replace("{name}", entity.name)
+                    )
+                }
+            },
             onPermanentlyDelete = {
                 viewModel.onPermanentlyDelete()
                 navController.popBackStack()
@@ -149,15 +157,33 @@ private fun NavGraphBuilder.addPackagesScreen(
             }
         )
     }
-    composable(route = Destination.EditPackage.route) {
+    composable(
+        route = Destination.EditPackage.route,
+        arguments = listOf(
+            navArgument("tracker") { type = NavType.StringType },
+            navArgument("name") { type = NavType.StringType }
+        )
+    ) { navBackStackEntry ->
         val viewModel = hiltViewModel<EditPackageViewModel>()
         val uiState by viewModel.uiState.collectAsState(EditPackageUiState())
+
+        val name = navBackStackEntry.arguments?.getString("name")
+        val tracker = navBackStackEntry.arguments?.getString("tracker")
+
+        if (listOf(name, tracker).all { it != null }) {
+            LaunchedEffect(Unit) {
+                viewModel.onPopulateScreen(name!!, tracker!!)
+            }
+        }
 
         EditPackageScreen(
             uiState = uiState,
             onNavigateToPreviousScreen = { navController.popBackStack() },
             onChangePackageName = viewModel::onChangePackageName,
-            onSubmit = { navController.popBackStack() }
+            onSubmit = {
+                viewModel.onSubmit()
+                navController.popBackStack()
+            }
         )
     }
     composable(route = Destination.SearchPackage.route) {
