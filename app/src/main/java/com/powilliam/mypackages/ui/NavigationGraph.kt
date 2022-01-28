@@ -193,7 +193,17 @@ private fun NavGraphBuilder.addPackagesScreen(
         SearchPackageScreen(
             uiState = uiState,
             onSearch = viewModel::onSearch,
-            onNavigateToPreviousScreen = { navController.popBackStack() }
+            onNavigateToPreviousScreen = { navController.popBackStack() },
+            onNavigateToPackageScreen = {
+                navController.navigate(
+                    Destination.Package.route.replace(
+                        "{tracker}",
+                        it.tracker
+                    )
+                ) {
+                    popUpTo(Destination.PackagesMap.route)
+                }
+            }
         )
     }
 }
