@@ -10,3 +10,5 @@ data class Coordinates(val latitude: Double, val longitude: Double) {
         )
     }
 }
+
+val Brazil = Coordinates(-13.380858, -49.9469203)
