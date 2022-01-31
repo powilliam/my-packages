@@ -24,27 +24,28 @@ class SearchPackageViewModel @Inject constructor(
     val uiState: SharedFlow<SearchPackageUiState> =
         _uiState.shareIn(viewModelScope, SharingStarted.WhileSubscribed())
 
-    fun onCollectAccountPackages() = viewModelScope.launch {
-        packageRepository.all()
-            .onStart { _uiState.update { it.copy(packages = emptyList()) } }
-            .combine(_uiState) { packages, state ->
-                if (state.query.isEmpty().not()) {
-                    packages.filter {
-                        listOf(it.name, it.tracker)
-                            .map { field -> field.uppercase() }
-                            .any { field ->
-                                field.contains(
-                                    state.query.uppercase()
-                                )
-                            }
+    init {
+        viewModelScope.launch {
+            packageRepository.all()
+                .combine(_uiState) { packages, state ->
+                    if (state.query.isEmpty().not()) {
+                        packages.filter {
+                            listOf(it.name, it.tracker)
+                                .map { field -> field.uppercase() }
+                                .any { field ->
+                                    field.contains(
+                                        state.query.uppercase()
+                                    )
+                                }
+                        }
+                    } else {
+                        packages
                     }
-                } else {
-                    packages
                 }
-            }
-            .collect { packages ->
-                _uiState.update { it.copy(packages = packages) }
-            }
+                .collect { packages ->
+                    _uiState.update { it.copy(packages = packages) }
+                }
+        }
     }
 
     fun onSearch(newQuery: String) {

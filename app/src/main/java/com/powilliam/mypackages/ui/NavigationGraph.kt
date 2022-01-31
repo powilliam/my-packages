@@ -61,11 +61,6 @@ private fun NavGraphBuilder.addPackagesScreen(
             }
         }
 
-        DisposableEffect(uiState.account) {
-            val job = viewModel.onCollectAccountPackages()
-            onDispose { job.cancel() }
-        }
-
         PackagesMapScreen(
             uiState = uiState,
             onChangeAccount = { launchSignIn() },
@@ -190,11 +185,6 @@ private fun NavGraphBuilder.addPackagesScreen(
     composable(route = Destination.SearchPackage.route) {
         val viewModel = hiltViewModel<SearchPackageViewModel>()
         val uiState by viewModel.uiState.collectAsState(SearchPackageUiState())
-
-        DisposableEffect(Unit) {
-            val job = viewModel.onCollectAccountPackages()
-            onDispose { job.cancel() }
-        }
 
         SearchPackageScreen(
             uiState = uiState,
