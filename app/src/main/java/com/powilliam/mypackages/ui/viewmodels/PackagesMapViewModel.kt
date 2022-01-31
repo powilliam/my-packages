@@ -49,13 +49,14 @@ class PackagesMapViewModel @Inject constructor(
                     _uiState.update { it.copy(account = account) }
                 }
         }
+    }
 
-        viewModelScope.launch {
-            packageRepository.all()
-                .collect { packages ->
-                    _uiState.update { it.copy(packages = packages) }
-                }
-        }
+    fun onCollectAccountPackages() = viewModelScope.launch {
+        packageRepository.all()
+            .onStart { _uiState.update { it.copy(packages = emptyList()) } }
+            .collect { packages ->
+                _uiState.update { it.copy(packages = packages) }
+            }
     }
 
     fun onAuthenticateWithGoogleSignIn(idToken: String?) = viewModelScope.launch {
