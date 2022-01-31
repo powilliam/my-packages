@@ -35,6 +35,7 @@ import com.powilliam.mypackages.ui.composables.NetworkImage
 import com.powilliam.mypackages.ui.composables.PackageOnMapCard
 import com.powilliam.mypackages.ui.viewmodels.PackagesMapUiState
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -78,8 +79,11 @@ fun PackagesMapScreen(
                     .fillMaxSize()
                     .align(Alignment.Center),
             ) { googleMap ->
-                googleMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(-7.149172, -34.966084)))
-                googleMap.animateCamera(CameraUpdateFactory.zoomTo(5f), 800, null)
+                googleMap.moveCamera(
+                    CameraUpdateFactory.newLatLng(
+                        LatLng(Brazil.latitude, Brazil.longitude)
+                    )
+                )
             }
             PackagesMapScreenAppBar(
                 account = uiState.account,
