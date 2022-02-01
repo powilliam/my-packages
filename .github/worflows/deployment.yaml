@@ -22,6 +22,7 @@ jobs:
       RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
       APP_GOOGLE_SERVICES_FILE_BASE64: ${{ secrets.APP_GOOGLE_SERVICES_FILE_BASE64 }}
       FASTLANE_GOOGLE_SERVICES_FILE_BASE64: ${{ secrets.FASTLANE_GOOGLE_SERVICES_FILE_BASE64 }}
+      GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
     steps:
       - uses: actions/checkout@v2
@@ -29,6 +30,7 @@ jobs:
           echo $RELEASE_STORE_FILE_BASE64 > release.keystore.asc
           echo $APP_GOOGLE_SERVICES_FILE_BASE64 > app-google-services.json.asc
           echo $FASTLANE_GOOGLE_SERVICES_FILE_BASE64 > fastlane-google-services.json.asc
+          echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" > local.properties
           gpg -d --passphrase $GPG_PASSPHRASE --batch release.keystore.asc > app/production.keystore
           gpg -d --passphrase $GPG_PASSPHRASE --batch app-google-services.json.asc > app/google-services.json
           gpg -d --passphrase $GPG_PASSPHRASE --batch fastlane-google-services.json.asc > fastlane/google-services.json
