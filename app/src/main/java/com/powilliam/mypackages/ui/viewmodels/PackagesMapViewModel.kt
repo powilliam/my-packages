@@ -2,6 +2,8 @@ package com.powilliam.mypackages.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.powilliam.mypackages.data.entity.Brazil
+import com.powilliam.mypackages.data.entity.Coordinates
 import com.powilliam.mypackages.data.entity.Package
 import com.powilliam.mypackages.data.entity.UserEntity
 import com.powilliam.mypackages.data.repository.AuthRepository
@@ -15,7 +17,8 @@ import javax.inject.Inject
 data class PackagesMapUiState(
     val account: UserEntity? = null,
     val isAuthFeatureEnabled: Boolean = true,
-    val packages: List<Package> = emptyList()
+    val packages: List<Package> = emptyList(),
+    val coordinates: Coordinates = Brazil
 ) {
     val isSignedIn = account != null
     val shouldPromptSignIn = isSignedIn.not() and isAuthFeatureEnabled
@@ -53,8 +56,20 @@ class PackagesMapViewModel @Inject constructor(
         viewModelScope.launch {
             packageRepository.all()
                 .collect { packages ->
-                    _uiState.update { it.copy(packages = packages) }
+                    val first = packages.firstOrNull()?.events?.firstOrNull { event ->
+                        event.location.address.coordinates != null
+                    }?.location?.address?.coordinates ?: Brazil
+                    _uiState.update { it.copy(packages = packages, coordinates = first) }
                 }
+        }
+    }
+
+    fun onFocusAtOnePackage(entity: Package) {
+        viewModelScope.launch {
+            val event = entity.events.firstOrNull { it.location.address.coordinates != null }
+            event?.location?.address?.coordinates?.let { coordinates ->
+                _uiState.update { it.copy(coordinates = coordinates) }
+            }
         }
     }
 
