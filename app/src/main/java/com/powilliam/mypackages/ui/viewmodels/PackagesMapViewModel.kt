@@ -52,16 +52,17 @@ class PackagesMapViewModel @Inject constructor(
                     _uiState.update { it.copy(account = account) }
                 }
         }
+    }
 
-        viewModelScope.launch {
-            packageRepository.all()
-                .collect { packages ->
-                    val first = packages.firstOrNull()?.events?.firstOrNull { event ->
-                        event.location.address.coordinates != null
-                    }?.location?.address?.coordinates ?: Brazil
-                    _uiState.update { it.copy(packages = packages, coordinates = first) }
-                }
-        }
+    fun onCollectPackagesBasedOnSignedAccount() = viewModelScope.launch {
+        packageRepository.all()
+            .onStart { emit(emptyList()) }
+            .collect { packages ->
+                val first = packages.firstOrNull()?.events?.firstOrNull { event ->
+                    event.location.address.coordinates != null
+                }?.location?.address?.coordinates ?: Brazil
+                _uiState.update { it.copy(packages = packages, coordinates = first) }
+            }
     }
 
     fun onFocusAtOnePackage(entity: Package) {
