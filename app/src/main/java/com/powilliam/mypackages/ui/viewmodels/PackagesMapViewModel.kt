@@ -9,6 +9,7 @@ import com.powilliam.mypackages.data.entity.UserEntity
 import com.powilliam.mypackages.data.repository.AuthRepository
 import com.powilliam.mypackages.data.repository.FeatureFlagRepository
 import com.powilliam.mypackages.data.repository.PackageRepository
+import com.powilliam.mypackages.data.repository.UserSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -28,7 +29,8 @@ data class PackagesMapUiState(
 class PackagesMapViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val featureFlagRepository: FeatureFlagRepository,
-    private val packageRepository: PackageRepository
+    private val packageRepository: PackageRepository,
+    private val userSettingsRepository: UserSettingsRepository
 ) : ViewModel() {
     private val _uiState: MutableStateFlow<PackagesMapUiState> = MutableStateFlow(
         PackagesMapUiState()
@@ -48,6 +50,11 @@ class PackagesMapViewModel @Inject constructor(
         viewModelScope.launch {
             authRepository.getAuthenticatedAccount()
                 .distinctUntilChanged { old, new -> old?.id == new?.id }
+                .onEach { account ->
+                    account?.let {
+                        userSettingsRepository.updateDeviceTokenSettings(it.id)
+                    }
+                }
                 .collectLatest { account ->
                     _uiState.update { it.copy(account = account) }
                 }

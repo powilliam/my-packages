@@ -1,8 +1,6 @@
 package com.powilliam.mypackages.di
 
-import com.powilliam.mypackages.data.datasource.AuthRemoteDataSource
-import com.powilliam.mypackages.data.datasource.FeatureFlagRemoteDataSource
-import com.powilliam.mypackages.data.datasource.PackageRemoteDataSource
+import com.powilliam.mypackages.data.datasource.*
 import com.powilliam.mypackages.data.repository.*
 import dagger.Module
 import dagger.Provides
@@ -32,5 +30,15 @@ object RepositoryModule {
     ): PackageRepository = PackageRepositoryImpl(
         authRemoteDataSource,
         packageRemoteDataSource,
+    )
+
+    @Singleton
+    @Provides
+    fun provideUserSettingsRepository(
+        deviceTokenLocalDataSource: DeviceTokenLocalDataSource,
+        userSettingsRemoteDataSource: UserSettingsRemoteDataSource
+    ): UserSettingsRepository = UserSettingsRepositoryImpl(
+        deviceTokenLocalDataSource,
+        userSettingsRemoteDataSource
     )
 }
