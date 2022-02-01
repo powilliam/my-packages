@@ -27,12 +27,12 @@ jobs:
       - uses: actions/checkout@v2
       - run: |
           echo $RELEASE_STORE_FILE_BASE64 > release.keystore.asc
-          echo $GOOGLE_SERVICES_FILE_BASE64 > app-google-services.json.asc
+          echo $APP_GOOGLE_SERVICES_FILE_BASE64 > app-google-services.json.asc
           echo $FASTLANE_GOOGLE_SERVICES_FILE_BASE64 > fastlane-google-services.json.asc
-          gpg -d --passphrase $GPG_PASSPHRASE --batch release.keystore.asc > app/release.keystore
+          gpg -d --passphrase $GPG_PASSPHRASE --batch release.keystore.asc > app/production.keystore
           gpg -d --passphrase $GPG_PASSPHRASE --batch app-google-services.json.asc > app/google-services.json
-          gpg -d --passphrase $GPG_PASSPHRASE --batch -fastlanegoogle-services.json.asc > fastlane/google-services.json
-          export RELEASE_STORE_FILE=app/release.keystore
+          gpg -d --passphrase $GPG_PASSPHRASE --batch fastlane-google-services.json.asc > fastlane/google-services.json
+          export RELEASE_STORE_FILE=app/production.keystore
   build-and-deploy:
     needs: [setup-ruby, setup-secrets]
     runs-on: ubuntu-latest
