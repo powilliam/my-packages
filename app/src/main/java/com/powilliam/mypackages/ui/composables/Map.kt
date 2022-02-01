@@ -2,24 +2,33 @@ package com.powilliam.mypackages.ui.composables
 
 import android.content.Context
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.powilliam.mypackages.ui.utils.rememberLifecycleObserver
 import com.powilliam.mypackages.R
 
 @Composable
-fun Map(modifier: Modifier = Modifier, onMapReady: (GoogleMap) -> Unit = {}) {
+fun Map(
+    modifier: Modifier = Modifier,
+    options: GoogleMapOptions = GoogleMapOptions()
+        .backgroundColor(MaterialTheme.colorScheme.background.toArgb())
+        .mapToolbarEnabled(false),
+    onMapReady: (GoogleMap) -> Unit = {}
+) {
     val context = LocalContext.current
 
-    val mapView = rememberMapViewWithLifecycleObserver()
+    val mapView = rememberMapViewWithLifecycleObserver(options)
     val style = rememberMapStyle({ context })
 
     AndroidView({ mapView }, modifier, update = { view ->
@@ -31,12 +40,12 @@ fun Map(modifier: Modifier = Modifier, onMapReady: (GoogleMap) -> Unit = {}) {
 }
 
 @Composable
-fun rememberMapViewWithLifecycleObserver(): MapView {
+fun rememberMapViewWithLifecycleObserver(options: GoogleMapOptions = GoogleMapOptions()): MapView {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val view = remember {
-        MapView(context)
+        MapView(context, options)
     }
     val observer = rememberLifecycleObserver(
         onCreate = { view.onCreate(null) },
