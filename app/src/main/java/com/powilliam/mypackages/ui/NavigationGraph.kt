@@ -131,7 +131,10 @@ private fun NavGraphBuilder.addPackagesScreen(
                     )
                 }
             },
-            onMarkPackageAsReceived = {}
+            onDeletePackage = {
+                viewModel.onDeletePackage()
+                navController.popBackStack()
+            }
         )
     }
     composable(route = Destination.AddPackage.route) {

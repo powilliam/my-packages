@@ -11,6 +11,7 @@ interface PackageRepository {
     suspend fun one(tracker: String): Flow<Package>
     suspend fun insert(newPackage: Package)
     suspend fun update(tracker: String, name: String)
+    suspend fun delete(tracker: String)
 }
 
 class PackageRepositoryImpl @Inject constructor(
@@ -39,5 +40,10 @@ class PackageRepositoryImpl @Inject constructor(
     override suspend fun update(tracker: String, name: String) {
         val account = authRemoteDataSource.getAuthenticatedAccount() ?: return
         packageRemoteDataSource.update(account.uid, tracker, name)
+    }
+
+    override suspend fun delete(tracker: String) {
+        val account = authRemoteDataSource.getAuthenticatedAccount() ?: return
+        packageRemoteDataSource.delete(account.uid, tracker)
     }
 }
