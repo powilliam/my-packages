@@ -82,20 +82,22 @@ fun PackagesMapScreen(
     }
 
     LaunchedEffect(uiState.packages, googleMapRef) {
-        snapshotFlow { uiState.packages }.collect { packages ->
-            packages.forEach { entity ->
-                entity.events.firstOrNull()?.let { event ->
-                    event.location.address.coordinates?.let { coordinates ->
-                        val position = LatLng(coordinates.latitude, coordinates.longitude)
-                        val marker = MarkerOptions()
-                            .position(position)
-                            .title(entity.tracker)
-                            .snippet(entity.name)
-                        googleMapRef?.addMarker(marker)
+        snapshotFlow { uiState.packages }
+            .onStart { googleMapRef?.clear() }
+            .collect { packages ->
+                packages.forEach { entity ->
+                    entity.events.firstOrNull()?.let { event ->
+                        event.location.address.coordinates?.let { coordinates ->
+                            val position = LatLng(coordinates.latitude, coordinates.longitude)
+                            val marker = MarkerOptions()
+                                .position(position)
+                                .title(entity.tracker)
+                                .snippet(entity.name)
+                            googleMapRef?.addMarker(marker)
+                        }
                     }
                 }
             }
-        }
     }
 
     ModalBottomSheetLayout(
