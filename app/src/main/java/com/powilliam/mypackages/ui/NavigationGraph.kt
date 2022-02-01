@@ -65,6 +65,7 @@ private fun NavGraphBuilder.addPackagesScreen(
             uiState = uiState,
             onChangeAccount = { launchSignIn() },
             onSignOut = { viewModel.onSignOut() },
+            onFocusAtOnePackage = viewModel::onFocusAtOnePackage,
             onNavigateToSearchPackageScreen = {
                 if (uiState.shouldPromptSignIn) {
                     launchSignIn()

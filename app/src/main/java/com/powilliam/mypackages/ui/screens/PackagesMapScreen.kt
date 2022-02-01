@@ -16,8 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,16 +25,22 @@ import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.*
 import com.powilliam.mypackages.data.entity.*
 import com.powilliam.mypackages.ui.composables.Avatar
 import com.powilliam.mypackages.ui.composables.Map
 import com.powilliam.mypackages.ui.composables.NetworkImage
 import com.powilliam.mypackages.ui.composables.PackageOnMapCard
 import com.powilliam.mypackages.ui.viewmodels.PackagesMapUiState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
+
+private const val HALF_OF_SECOND_IN_MILLISECONDS = 500L
+private const val ONE_SECOND_IN_MILLISECONDS = 1000
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -44,12 +49,54 @@ fun PackagesMapScreen(
     uiState: PackagesMapUiState,
     onChangeAccount: () -> Unit,
     onSignOut: () -> Unit,
+    onFocusAtOnePackage: (Package) -> Unit,
     onNavigateToSearchPackageScreen: () -> Unit,
     onNavigateToAddPackageScreen: () -> Unit,
     onNavigateToPackageScreen: (Package) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    var googleMapRef: GoogleMap? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(uiState.coordinates, googleMapRef) {
+        snapshotFlow { uiState.coordinates }
+            .map {
+                val isBrazil = listOf(Brazil.latitude, Brazil.longitude).all { coordinate ->
+                    listOf(it.latitude, it.longitude).contains(coordinate)
+                }
+                val target = LatLng(it.latitude, it.longitude)
+                val zoom = if (isBrazil) 2f else 10f
+                CameraPosition.Builder()
+                    .target(target)
+                    .zoom(zoom)
+                    .build()
+            }
+            .collect { position ->
+                delay(HALF_OF_SECOND_IN_MILLISECONDS)
+                googleMapRef?.animateCamera(
+                    CameraUpdateFactory.newCameraPosition(position),
+                    ONE_SECOND_IN_MILLISECONDS,
+                    null
+                )
+            }
+    }
+
+    LaunchedEffect(uiState.packages, googleMapRef) {
+        snapshotFlow { uiState.packages }.collect { packages ->
+            packages.forEach { entity ->
+                entity.events.firstOrNull()?.let { event ->
+                    event.location.address.coordinates?.let { coordinates ->
+                        val position = LatLng(coordinates.latitude, coordinates.longitude)
+                        val marker = MarkerOptions()
+                            .position(position)
+                            .title(entity.tracker)
+                            .snippet(entity.name)
+                        googleMapRef?.addMarker(marker)
+                    }
+                }
+            }
+        }
+    }
 
     ModalBottomSheetLayout(
         sheetState = sheetState,
@@ -79,11 +126,7 @@ fun PackagesMapScreen(
                     .fillMaxSize()
                     .align(Alignment.Center),
             ) { googleMap ->
-                googleMap.moveCamera(
-                    CameraUpdateFactory.newLatLng(
-                        LatLng(Brazil.latitude, Brazil.longitude)
-                    )
-                )
+                googleMapRef = googleMap
             }
             PackagesMapScreenAppBar(
                 account = uiState.account,
@@ -94,7 +137,8 @@ fun PackagesMapScreen(
             )
             PackagesList(
                 packages = uiState.packages,
-                onNavigateToPackageScreen = onNavigateToPackageScreen
+                onNavigateToPackageScreen = onNavigateToPackageScreen,
+                onFocusAtOnePackage = onFocusAtOnePackage
             )
         }
     }
@@ -151,9 +195,20 @@ private fun BoxScope.PackagesMapScreenAppBar(
 private fun BoxScope.PackagesList(
     modifier: Modifier = Modifier,
     packages: List<Package> = emptyList(),
+    onFocusAtOnePackage: (Package) -> Unit,
     onNavigateToPackageScreen: (Package) -> Unit
 ) {
+    val pagerState = rememberPagerState()
+
+    LaunchedEffect(pagerState, packages) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            val entity = packages.getOrNull(page)
+            if (entity != null) onFocusAtOnePackage(entity)
+        }
+    }
+
     HorizontalPager(
+        state = pagerState,
         modifier = modifier
             .navigationBarsPadding()
             .align(Alignment.BottomCenter),
