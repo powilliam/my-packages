@@ -1,0 +1,10 @@
+default_platform(:android)
+
+platform :android do
+  desc "Deploy a new version to the Google Play"
+  lane :deploy do |options|
+    track = (options[:track] ? options[:track] : 'internal')
+    gradle(task: "clean bundleRelease")
+    upload_to_play_store(track: track)
+  end
+end
