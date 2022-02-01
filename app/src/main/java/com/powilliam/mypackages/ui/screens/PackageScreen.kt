@@ -28,7 +28,7 @@ fun PackageScreen(
     uiState: PackageUiState = PackageUiState(),
     onNavigateToPreviousScreen: () -> Unit,
     onNavigateToEditPackageScreen: () -> Unit,
-    onMarkPackageAsReceived: () -> Unit
+    onDeletePackage: () -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -37,20 +37,9 @@ fun PackageScreen(
             PackageScreenAppBar(
                 onNavigateToPreviousScreen,
                 onNavigateToEditPackageScreen,
+                onDeletePackage
             )
         },
-        floatingActionButton = {
-            Button(
-                modifier = modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
-                    .navigationBarsPadding(),
-                onClick = onMarkPackageAsReceived
-            ) {
-                Text(text = "Recebi esse pacote")
-            }
-        },
-        floatingActionButtonPosition = FabPosition.Center
     ) {
         Column(
             modifier
@@ -70,6 +59,7 @@ fun PackageScreen(
 private fun PackageScreenAppBar(
     onNavigateToPreviousScreen: () -> Unit,
     onNavigateToEditPackageScreen: () -> Unit,
+    onDeletePackage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     SmallTopAppBar(
@@ -83,6 +73,9 @@ private fun PackageScreenAppBar(
         actions = {
             IconButton(onClick = onNavigateToEditPackageScreen) {
                 Icon(imageVector = Icons.Rounded.Edit, contentDescription = null)
+            }
+            IconButton(onClick = onDeletePackage) {
+                Icon(imageVector = Icons.Rounded.DeleteForever, contentDescription = null)
             }
         }
     )

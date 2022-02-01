@@ -187,9 +187,9 @@ fun EventsCard(modifier: Modifier = Modifier, events: List<Event> = emptyList())
         color = MaterialTheme.colorScheme.surface
     ) {
         LazyColumn {
-            itemsIndexed(events) { position, event ->
+            itemsIndexed(events.reversed()) { position, event ->
                 PackageDetail(
-                    iconSize = 40.dp,
+                    iconSize = 44.dp,
                     icon = {
                         Avatar(color = MaterialTheme.colorScheme.tertiary) {
                             Text(
