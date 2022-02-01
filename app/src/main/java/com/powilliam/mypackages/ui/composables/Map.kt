@@ -11,12 +11,15 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.powilliam.mypackages.ui.utils.rememberLifecycleObserver
 import com.powilliam.mypackages.R
+import com.powilliam.mypackages.data.entity.Brazil
 
 @Composable
 fun Map(
@@ -34,6 +37,11 @@ fun Map(
     AndroidView({ mapView }, modifier, update = { view ->
         view.getMapAsync { googleMap ->
             googleMap.setMapStyle(style)
+            googleMap.moveCamera(
+                CameraUpdateFactory.newLatLng(
+                    LatLng(Brazil.latitude, Brazil.longitude)
+                )
+            )
             onMapReady(googleMap)
         }
     })
