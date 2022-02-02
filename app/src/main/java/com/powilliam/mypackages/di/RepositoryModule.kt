@@ -41,4 +41,10 @@ object RepositoryModule {
         deviceTokenLocalDataSource,
         userSettingsRemoteDataSource
     )
+
+    @Singleton
+    @Provides
+    fun provideNotificationRepository(
+        notificationLocalDataSource: NotificationLocalDataSource
+    ): NotificationRepository = NotificationRepositoryImpl(notificationLocalDataSource)
 }
