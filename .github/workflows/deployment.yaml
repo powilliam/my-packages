@@ -2,8 +2,7 @@ name: Play Store deploy
 on:
   push:
     branches:
-      - main
-      - staging
+      - "release/**"
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
