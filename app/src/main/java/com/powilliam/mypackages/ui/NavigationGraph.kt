@@ -14,13 +14,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.android.gms.auth.api.identity.Identity
-import com.powilliam.mypackages.ui.screens.PackageScreen
-import com.powilliam.mypackages.ui.screens.AddPackageScreen
-import com.powilliam.mypackages.ui.screens.EditPackageScreen
-import com.powilliam.mypackages.ui.screens.PackagesMapScreen
-import com.powilliam.mypackages.ui.screens.SearchPackageScreen
+import com.powilliam.mypackages.ui.screens.*
 import com.powilliam.mypackages.ui.viewmodels.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+
+private const val HALF_OF_ONE_SECOND_IN_MILLISECONDS = 500L
 
 @Composable
 fun NavigationGraph(beginSignIn: suspend () -> IntentSenderRequest) {
@@ -61,9 +60,11 @@ private fun NavGraphBuilder.addPackagesScreen(
             }
         }
 
-        DisposableEffect(uiState.account) {
-            val job = viewModel.onCollectPackagesBasedOnSignedAccount()
-            onDispose { job.cancel() }
+        LaunchedEffect(uiState.account) {
+            uiState.account?.let { account ->
+                viewModel.onCollectPackagesBasedOnSignedAccount()
+                viewModel.onCollectNotificationsCount(account.id)
+            }
         }
 
         PackagesMapScreen(
@@ -99,6 +100,9 @@ private fun NavGraphBuilder.addPackagesScreen(
                         )
                     )
                 }
+            },
+            onNavigateToNotificationsScreen = {
+                navController.navigate(Destination.Notifications.route)
             }
         )
     }
@@ -214,6 +218,27 @@ private fun NavGraphBuilder.addPackagesScreen(
                     popUpTo(Destination.PackagesMap.route)
                 }
             }
+        )
+    }
+    composable(route = Destination.Notifications.route) {
+        val viewModel = hiltViewModel<NotificationsViewModel>()
+        val uiState by viewModel.uiState.collectAsState(NotificationsUiState())
+
+        LaunchedEffect(uiState.account) {
+            uiState.account?.let { account ->
+                viewModel.onCollectNotificationsByReceiverId(account.id)
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            withTimeout(HALF_OF_ONE_SECOND_IN_MILLISECONDS) {
+                viewModel.onMarkAllNotificationsAsVisualized()
+            }
+        }
+
+        NotificationsScreen(
+            uiState = uiState,
+            onNavigateToPreviousScreen = { navController.popBackStack() }
         )
     }
 }

@@ -6,16 +6,15 @@ import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccountCircle
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Logout
-import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Badge
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +51,8 @@ fun PackagesMapScreen(
     onFocusAtOnePackage: (Package) -> Unit,
     onNavigateToSearchPackageScreen: () -> Unit,
     onNavigateToAddPackageScreen: () -> Unit,
-    onNavigateToPackageScreen: (Package) -> Unit
+    onNavigateToPackageScreen: (Package) -> Unit,
+    onNavigateToNotificationsScreen: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -133,8 +133,10 @@ fun PackagesMapScreen(
             PackagesMapScreenAppBar(
                 account = uiState.account,
                 isSignedIn = uiState.isSignedIn,
+                notificationsCount = uiState.notificationsCount,
                 onShowBottomSheet = { coroutineScope.launch { sheetState.show() } },
                 onNavigateToSearchPackageScreen = onNavigateToSearchPackageScreen,
+                onNavigateToNotificationsScreen = onNavigateToNotificationsScreen,
                 onNavigateToAddPackageScreen = onNavigateToAddPackageScreen
             )
             PackagesList(
@@ -151,8 +153,10 @@ private fun BoxScope.PackagesMapScreenAppBar(
     modifier: Modifier = Modifier,
     account: UserEntity? = null,
     isSignedIn: Boolean = false,
+    notificationsCount: Int = 0,
     onShowBottomSheet: () -> Unit,
     onNavigateToSearchPackageScreen: () -> Unit,
+    onNavigateToNotificationsScreen: () -> Unit,
     onNavigateToAddPackageScreen: () -> Unit
 ) {
     SmallTopAppBar(
@@ -180,6 +184,21 @@ private fun BoxScope.PackagesMapScreenAppBar(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface
                 )
+            }
+            IconButton(onClick = onNavigateToNotificationsScreen) {
+                BadgedBox(
+                    badge = {
+                        if (notificationsCount > 0) {
+                            Badge { Text(text = "$notificationsCount") }
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Notifications,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
             IconButton(onClick = onNavigateToAddPackageScreen) {
                 Icon(
