@@ -7,6 +7,7 @@ import com.powilliam.mypackages.data.entity.Coordinates
 import com.powilliam.mypackages.data.entity.Package
 import com.powilliam.mypackages.data.entity.UserEntity
 import com.powilliam.mypackages.data.repository.*
+import com.powilliam.mypackages.domain.usecase.CountUnVisualizedNotificationsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -29,7 +30,7 @@ class PackagesMapViewModel @Inject constructor(
     private val featureFlagRepository: FeatureFlagRepository,
     private val packageRepository: PackageRepository,
     private val userSettingsRepository: UserSettingsRepository,
-    private val notificationRepository: NotificationRepository
+    private val countUnVisualizedNotificationsUseCase: CountUnVisualizedNotificationsUseCase
 ) : ViewModel() {
     private val _uiState: MutableStateFlow<PackagesMapUiState> = MutableStateFlow(
         PackagesMapUiState()
@@ -72,10 +73,8 @@ class PackagesMapViewModel @Inject constructor(
     }
 
     fun onCollectNotificationsCount(receiverId: String) = viewModelScope.launch {
-        notificationRepository.loadNotificationsByReceiverId(receiverId)
-            .onStart { _uiState.update { it.copy(notificationsCount = 0) } }
-            .map { notifications -> notifications.filter { notification -> notification.hasVisualized.not() } }
-            .map { notifications -> notifications.count() }
+        countUnVisualizedNotificationsUseCase.execute(receiverId)
+            .onStart { emit(0) }
             .collect { count ->
                 _uiState.update { it.copy(notificationsCount = count) }
             }
