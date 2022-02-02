@@ -1,0 +1,33 @@
+name: Play Store deploy
+on:
+  push:
+    branches:
+      - main
+      - staging
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+      RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+      RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+          bundler-cache: true
+      - run: |
+          echo '${{ secrets.RELEASE_STORE_FILE_BASE64 }}' > mypackagesprod.keystore.asc
+          echo '${{ secrets.APP_GOOGLE_SERVICES_FILE_BASE64 }}' > app-google-services.json.asc
+          echo '${{ secrets.FASTLANE_GOOGLE_SERVICES_FILE_BASE64 }}' > fastlane-google-services.json.asc
+          echo 'MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}' > local.properties
+
+          gpg -d --passphrase '${{ secrets.GPG_PASSPHRASE }}' --batch ./mypackagesprod.keystore.asc > app/mypackagesprod.keystore
+          gpg -d --passphrase '${{ secrets.GPG_PASSPHRASE }}' --batch ./app-google-services.json.asc > app/google-services.json
+          gpg -d --passphrase '${{ secrets.GPG_PASSPHRASE }}' --batch ./fastlane-google-services.json.asc > fastlane/google-services.json
+
+          export RELEASE_STORE_FILE=$(pwd)/app/mypackagesprod.keystore
+
+          bundle install
+          bundle exec fastlane deploy track:Staging
