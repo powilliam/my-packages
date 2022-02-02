@@ -16,4 +16,7 @@ interface NotificationAccessObject {
 
     @Query("UPDATE Notification SET notification_has_visualized = 1")
     suspend fun markAllNotificationsAsVisualized()
+
+    @Query("DELETE FROM Notification WHERE notification_receiver_id = :receiverId")
+    suspend fun deleteAllNotifications(receiverId: String)
 }

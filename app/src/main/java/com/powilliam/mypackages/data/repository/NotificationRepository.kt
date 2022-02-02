@@ -9,6 +9,7 @@ interface NotificationRepository {
     suspend fun loadNotificationsByReceiverId(receiverId: String): Flow<List<Notification>>
     suspend fun insertNotification(notification: Notification)
     suspend fun markAllNotificationsAsVisualized()
+    suspend fun deleteAllNotifications(receiverId: String)
 }
 
 class NotificationRepositoryImpl @Inject constructor(
@@ -22,4 +23,7 @@ class NotificationRepositoryImpl @Inject constructor(
 
     override suspend fun markAllNotificationsAsVisualized() =
         notificationLocalDataSource.markAllNotificationsAsVisualized()
+
+    override suspend fun deleteAllNotifications(receiverId: String) =
+        notificationLocalDataSource.deleteAllNotifications(receiverId)
 }
