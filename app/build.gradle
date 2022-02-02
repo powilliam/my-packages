@@ -58,6 +58,8 @@ android {
 dependencies {
     def compose_version = "1.2.0-alpha02"
     def accompanist_version = "0.24.0-alpha"
+    def room_version = "2.4.1"
+    def work_version = "2.7.1"
 
     implementation platform('com.google.firebase:firebase-bom:29.0.3')
 
@@ -103,6 +105,14 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:18.0.2'
 
     implementation 'io.coil-kt:coil-compose:1.4.0'
+
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+
+    implementation "androidx.work:work-runtime-ktx:$work_version"
+    implementation 'androidx.hilt:hilt-work:1.0.0'
+    kapt 'androidx.hilt:hilt-compiler:1.0.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

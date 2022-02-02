@@ -6,4 +6,5 @@ sealed class Destination(val route: String) {
     object AddPackage : Destination("/packages/create")
     object EditPackage : Destination("/packages/edit?tracker={tracker}&name={name}")
     object SearchPackage : Destination("/packages/search")
+    object Notifications : Destination("/notifications")
 }
