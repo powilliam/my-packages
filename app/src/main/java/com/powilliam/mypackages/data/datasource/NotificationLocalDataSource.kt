@@ -11,6 +11,7 @@ interface NotificationLocalDataSource {
     suspend fun loadNotificationsByReceiverId(receiverId: String): Flow<List<Notification>>
     suspend fun insertNotification(notification: Notification)
     suspend fun markAllNotificationsAsVisualized()
+    suspend fun deleteAllNotifications(receiverId: String)
 }
 
 class NotificationLocalDataSourceImpl @Inject constructor(
@@ -31,6 +32,12 @@ class NotificationLocalDataSourceImpl @Inject constructor(
     override suspend fun markAllNotificationsAsVisualized() {
         withContext(Dispatchers.IO) {
             notificationAccessObject.markAllNotificationsAsVisualized()
+        }
+    }
+
+    override suspend fun deleteAllNotifications(receiverId: String) {
+        withContext(Dispatchers.IO) {
+            notificationAccessObject.deleteAllNotifications(receiverId)
         }
     }
 }

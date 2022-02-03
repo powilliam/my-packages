@@ -1,7 +1,6 @@
 package com.powilliam.mypackages.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
@@ -10,7 +9,6 @@ import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.BadgedBox
@@ -19,7 +17,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -29,10 +26,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
 import com.powilliam.mypackages.data.entity.*
-import com.powilliam.mypackages.ui.composables.Avatar
-import com.powilliam.mypackages.ui.composables.Map
-import com.powilliam.mypackages.ui.composables.NetworkImage
-import com.powilliam.mypackages.ui.composables.PackageOnMapCard
+import com.powilliam.mypackages.ui.composables.*
 import com.powilliam.mypackages.ui.viewmodels.PackagesMapUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -100,11 +94,8 @@ fun PackagesMapScreen(
             }
     }
 
-    ModalBottomSheetLayout(
-        sheetState = sheetState,
-        sheetBackgroundColor = MaterialTheme.colorScheme.surface,
-        sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-        sheetElevation = 2.dp,
+    ModalBottomSheet(
+        state = sheetState,
         sheetContent = {
             BottomSheet(
                 onChangeAccount = {
@@ -248,29 +239,25 @@ private fun BottomSheet(
     onChangeAccount: () -> Unit,
     onSignOut: () -> Unit
 ) {
-    Surface(modifier.navigationBarsPadding()) {
-        Column {
-            TextButton(onClick = onChangeAccount) {
-                Icon(
-                    modifier = modifier.size(ButtonDefaults.IconSize),
-                    imageVector = Icons.Rounded.AccountCircle,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier.width(ButtonDefaults.IconSpacing))
-                Text(text = "Trocar de conta")
-            }
-            TextButton(onClick = onSignOut) {
-                Icon(
-                    modifier = modifier.size(ButtonDefaults.IconSize),
-                    imageVector = Icons.Rounded.Logout,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier.width(ButtonDefaults.IconSpacing))
-                Text(text = "Sair")
-            }
-        }
+    TextButton(onClick = onChangeAccount) {
+        Icon(
+            modifier = modifier.size(ButtonDefaults.IconSize),
+            imageVector = Icons.Rounded.AccountCircle,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier.width(ButtonDefaults.IconSpacing))
+        Text(text = "Trocar de conta")
+    }
+    TextButton(onClick = onSignOut) {
+        Icon(
+            modifier = modifier.size(ButtonDefaults.IconSize),
+            imageVector = Icons.Rounded.Logout,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier.width(ButtonDefaults.IconSpacing))
+        Text(text = "Sair")
     }
 }
 
