@@ -32,6 +32,11 @@ fun NotificationsRoute(navController: () -> NavController) {
 
     NotificationsScreen(
         uiState = uiState,
+        onDeleteAllNotifications = {
+            uiState.account?.let { account ->
+                viewModel.onDeleteAllNotifications(account.id)
+            }
+        },
         onNavigateToPreviousScreen = { navController().popBackStack() }
     )
 }

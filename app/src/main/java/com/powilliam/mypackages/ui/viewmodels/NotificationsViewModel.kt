@@ -13,7 +13,8 @@ import javax.inject.Inject
 
 data class NotificationsUiState(
     val account: UserEntity? = null,
-    val notifications: List<Notification> = emptyList()
+    val notifications: List<Notification> = emptyList(),
+    val isDropdownMenuExpanded: Boolean = false
 )
 
 @HiltViewModel
@@ -46,5 +47,9 @@ class NotificationsViewModel @Inject constructor(
 
     fun onMarkAllNotificationsAsVisualized() = viewModelScope.launch {
         notificationRepository.markAllNotificationsAsVisualized()
+    }
+
+    fun onDeleteAllNotifications(receiverId: String) = viewModelScope.launch {
+        notificationRepository.deleteAllNotifications(receiverId)
     }
 }
