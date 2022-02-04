@@ -2,26 +2,26 @@ package com.powilliam.mypackages.ui.screens
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.DeleteForever
-import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import com.powilliam.mypackages.ui.composables.EventsCard
+import com.powilliam.mypackages.ui.composables.ModalBottomSheet
 import com.powilliam.mypackages.ui.composables.PackageCard
 import com.powilliam.mypackages.ui.viewmodels.PackageUiState
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun PackageScreen(
     modifier: Modifier = Modifier,
@@ -30,26 +30,54 @@ fun PackageScreen(
     onNavigateToEditPackageScreen: () -> Unit,
     onDeletePackage: () -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
+    val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
-    Scaffold(
-        topBar = {
-            PackageScreenAppBar(
-                onNavigateToPreviousScreen,
-                onNavigateToEditPackageScreen,
-                onDeletePackage
+    ModalBottomSheet(
+        state = bottomSheetState,
+        sheetContent = {
+            BottomSheetContent(
+                onNavigateToEditPackageScreen = {
+                    coroutineScope.launch {
+                        onNavigateToEditPackageScreen()
+                        bottomSheetState.hide()
+                    }
+                },
+                onDeletePackage = {
+                    coroutineScope.launch {
+                        onDeletePackage()
+                        bottomSheetState.hide()
+                    }
+                }
             )
-        },
+        }
     ) {
-        Column(
-            modifier
+        Scaffold(
+            modifier = modifier
                 .scrollable(scrollState, orientation = Orientation.Vertical)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            topBar = {
+                PackageScreenAppBar(
+                    onNavigateToPreviousScreen = onNavigateToPreviousScreen,
+                    onShowBottomSheet = {
+                        coroutineScope.launch {
+                            bottomSheetState.show()
+                        }
+                    },
+                ) {
+                    uiState.entity?.let { entity ->
+                        Text(text = entity.tracker)
+                    }
+                }
+            },
         ) {
-            uiState.entity?.let { entity ->
-                PackageCard(entity)
-                EventsCard(events = entity.events)
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                uiState.entity?.let { entity ->
+                    Box {}
+                    PackageCard(entity)
+                    EventsCard(events = entity.events)
+                }
             }
         }
     }
@@ -57,26 +85,49 @@ fun PackageScreen(
 
 @Composable
 private fun PackageScreenAppBar(
-    onNavigateToPreviousScreen: () -> Unit,
-    onNavigateToEditPackageScreen: () -> Unit,
-    onDeletePackage: () -> Unit,
     modifier: Modifier = Modifier,
+    onNavigateToPreviousScreen: () -> Unit,
+    onShowBottomSheet: () -> Unit,
+    title: @Composable () -> Unit
 ) {
-    SmallTopAppBar(
+    CenterAlignedTopAppBar(
         modifier = modifier.statusBarsPadding(),
         navigationIcon = {
             IconButton(onClick = onNavigateToPreviousScreen) {
                 Icon(imageVector = Icons.Rounded.ArrowBack, contentDescription = null)
             }
         },
-        title = {},
+        title = { title() },
         actions = {
-            IconButton(onClick = onNavigateToEditPackageScreen) {
-                Icon(imageVector = Icons.Rounded.Edit, contentDescription = null)
-            }
-            IconButton(onClick = onDeletePackage) {
-                Icon(imageVector = Icons.Rounded.DeleteForever, contentDescription = null)
+            IconButton(onClick = onShowBottomSheet) {
+                Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = null)
             }
         }
     )
+}
+
+@Composable
+private fun ColumnScope.BottomSheetContent(
+    modifier: Modifier = Modifier,
+    onNavigateToEditPackageScreen: () -> Unit,
+    onDeletePackage: () -> Unit
+) {
+    TextButton(onClick = onNavigateToEditPackageScreen) {
+        Icon(
+            imageVector = Icons.Rounded.Edit,
+            contentDescription = null,
+            modifier = modifier.size(ButtonDefaults.IconSize)
+        )
+        Spacer(modifier = modifier.width(ButtonDefaults.IconSpacing))
+        Text(text = "Editar")
+    }
+    TextButton(onClick = onDeletePackage) {
+        Icon(
+            imageVector = Icons.Rounded.DeleteForever,
+            contentDescription = null,
+            modifier = modifier.size(ButtonDefaults.IconSize)
+        )
+        Spacer(modifier = modifier.width(ButtonDefaults.IconSpacing))
+        Text(text = "Deletar permanentemente")
+    }
 }
