@@ -1,5 +1,6 @@
 package com.powilliam.mypackages.ui.routes
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,14 +33,16 @@ fun PackagesMapRoute(
                 .getSignInClient(context)
                 .getSignInCredentialFromIntent(result.data)
             viewModel.onAuthenticateWithGoogleSignIn(credentials.googleIdToken)
-        } catch (_: Exception) {
+        } catch (exception: Exception) {
+            Log.e("GoogleSignIn", exception.message ?: "Failed to SignIn")
         }
     }
     val launchSignIn = {
         coroutineScope.launch {
             try {
                 launcher.launch(beginSignIn())
-            } catch (e: Exception) {
+            } catch (exception: Exception) {
+                Log.e("GoogleSignIn", exception.message ?: "Failed to SignIn")
             }
         }
     }
@@ -56,6 +59,7 @@ fun PackagesMapRoute(
         onChangeAccount = { launchSignIn() },
         onSignOut = { viewModel.onSignOut() },
         onFocusAtOnePackage = viewModel::onFocusAtOnePackage,
+        onLaunchOneTapSignIn = { launchSignIn() },
         onNavigateToSearchPackageScreen = {
             if (uiState.shouldPromptSignIn) {
                 launchSignIn()
@@ -86,7 +90,11 @@ fun PackagesMapRoute(
             }
         },
         onNavigateToNotificationsScreen = {
-            navController().navigate(Destination.Notifications.route)
+            if (uiState.shouldPromptSignIn) {
+                launchSignIn()
+            } else {
+                navController().navigate(Destination.Notifications.route)
+            }
         }
     )
 }
