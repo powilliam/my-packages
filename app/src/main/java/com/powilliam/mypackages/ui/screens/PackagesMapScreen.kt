@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -42,6 +43,7 @@ fun PackagesMapScreen(
     uiState: PackagesMapUiState,
     onChangeAccount: () -> Unit,
     onSignOut: () -> Unit,
+    onLaunchOneTapSignIn: () -> Unit,
     onFocusAtOnePackage: (Package) -> Unit,
     onNavigateToSearchPackageScreen: () -> Unit,
     onNavigateToAddPackageScreen: () -> Unit,
@@ -126,6 +128,7 @@ fun PackagesMapScreen(
                 isSignedIn = uiState.isSignedIn,
                 notificationsCount = uiState.notificationsCount,
                 onShowBottomSheet = { coroutineScope.launch { sheetState.show() } },
+                onLaunchOneTapSignIn = onLaunchOneTapSignIn,
                 onNavigateToSearchPackageScreen = onNavigateToSearchPackageScreen,
                 onNavigateToNotificationsScreen = onNavigateToNotificationsScreen,
                 onNavigateToAddPackageScreen = onNavigateToAddPackageScreen
@@ -146,6 +149,7 @@ private fun BoxScope.PackagesMapScreenAppBar(
     isSignedIn: Boolean = false,
     notificationsCount: Int = 0,
     onShowBottomSheet: () -> Unit,
+    onLaunchOneTapSignIn: () -> Unit,
     onNavigateToSearchPackageScreen: () -> Unit,
     onNavigateToNotificationsScreen: () -> Unit,
     onNavigateToAddPackageScreen: () -> Unit
@@ -158,12 +162,18 @@ private fun BoxScope.PackagesMapScreenAppBar(
             containerColor = Color.Transparent
         ),
         navigationIcon = {
-            if (isSignedIn) {
-                account?.avatar?.let {
-                    // TODO: Show initials if there's no image to display
-                    Avatar(onClick = onShowBottomSheet) {
+            Avatar(onClick = if (isSignedIn) onShowBottomSheet else onLaunchOneTapSignIn) {
+                if (isSignedIn) {
+                    account?.avatar?.let {
                         NetworkImage(modifier = modifier.fillMaxSize(), uri = it)
                     }
+                } else {
+                    Icon(
+                        modifier = modifier.size(18.dp),
+                        imageVector = Icons.Rounded.PersonAdd,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         },
