@@ -6,10 +6,8 @@ import com.powilliam.mypackages.data.entity.Brazil
 import com.powilliam.mypackages.data.entity.Coordinates
 import com.powilliam.mypackages.data.entity.Package
 import com.powilliam.mypackages.data.entity.UserEntity
-import com.powilliam.mypackages.data.repository.AuthRepository
-import com.powilliam.mypackages.data.repository.FeatureFlagRepository
-import com.powilliam.mypackages.data.repository.PackageRepository
-import com.powilliam.mypackages.data.repository.UserSettingsRepository
+import com.powilliam.mypackages.data.repository.*
+import com.powilliam.mypackages.domain.usecase.CountUnVisualizedNotificationsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -19,7 +17,8 @@ data class PackagesMapUiState(
     val account: UserEntity? = null,
     val isAuthFeatureEnabled: Boolean = true,
     val packages: List<Package> = emptyList(),
-    val coordinates: Coordinates = Brazil
+    val coordinates: Coordinates = Brazil,
+    val notificationsCount: Int = 0
 ) {
     val isSignedIn = account != null
     val shouldPromptSignIn = isSignedIn.not() and isAuthFeatureEnabled
@@ -30,7 +29,8 @@ class PackagesMapViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val featureFlagRepository: FeatureFlagRepository,
     private val packageRepository: PackageRepository,
-    private val userSettingsRepository: UserSettingsRepository
+    private val userSettingsRepository: UserSettingsRepository,
+    private val countUnVisualizedNotificationsUseCase: CountUnVisualizedNotificationsUseCase
 ) : ViewModel() {
     private val _uiState: MutableStateFlow<PackagesMapUiState> = MutableStateFlow(
         PackagesMapUiState()
@@ -69,6 +69,14 @@ class PackagesMapViewModel @Inject constructor(
                     event.location.address.coordinates != null
                 }?.location?.address?.coordinates ?: Brazil
                 _uiState.update { it.copy(packages = packages, coordinates = first) }
+            }
+    }
+
+    fun onCollectNotificationsCount(receiverId: String) = viewModelScope.launch {
+        countUnVisualizedNotificationsUseCase.execute(receiverId)
+            .onStart { emit(0) }
+            .collect { count ->
+                _uiState.update { it.copy(notificationsCount = count) }
             }
     }
 

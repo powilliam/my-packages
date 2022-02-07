@@ -23,7 +23,6 @@ class PackageRepositoryImpl @Inject constructor(
         return packageRemoteDataSource.all(account.uid)
             .map { packages -> packages.values.toList() as List<Map<String, Any>> }
             .map { packages -> packages.map { Package.fromMap(it) } }
-            .filter { packages -> packages.all { pkg -> pkg.events.isNotEmpty() } }
     }
 
     override suspend fun one(tracker: String): Flow<Package> {

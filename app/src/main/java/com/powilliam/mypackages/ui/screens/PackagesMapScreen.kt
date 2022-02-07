@@ -1,21 +1,18 @@
 package com.powilliam.mypackages.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccountCircle
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Logout
-import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Badge
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,10 +27,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
 import com.powilliam.mypackages.data.entity.*
-import com.powilliam.mypackages.ui.composables.Avatar
-import com.powilliam.mypackages.ui.composables.Map
-import com.powilliam.mypackages.ui.composables.NetworkImage
-import com.powilliam.mypackages.ui.composables.PackageOnMapCard
+import com.powilliam.mypackages.ui.composables.*
 import com.powilliam.mypackages.ui.viewmodels.PackagesMapUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -49,10 +43,12 @@ fun PackagesMapScreen(
     uiState: PackagesMapUiState,
     onChangeAccount: () -> Unit,
     onSignOut: () -> Unit,
+    onLaunchOneTapSignIn: () -> Unit,
     onFocusAtOnePackage: (Package) -> Unit,
     onNavigateToSearchPackageScreen: () -> Unit,
     onNavigateToAddPackageScreen: () -> Unit,
-    onNavigateToPackageScreen: (Package) -> Unit
+    onNavigateToPackageScreen: (Package) -> Unit,
+    onNavigateToNotificationsScreen: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -100,11 +96,8 @@ fun PackagesMapScreen(
             }
     }
 
-    ModalBottomSheetLayout(
-        sheetState = sheetState,
-        sheetBackgroundColor = MaterialTheme.colorScheme.surface,
-        sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-        sheetElevation = 2.dp,
+    ModalBottomSheet(
+        state = sheetState,
         sheetContent = {
             BottomSheet(
                 onChangeAccount = {
@@ -133,8 +126,11 @@ fun PackagesMapScreen(
             PackagesMapScreenAppBar(
                 account = uiState.account,
                 isSignedIn = uiState.isSignedIn,
+                notificationsCount = uiState.notificationsCount,
                 onShowBottomSheet = { coroutineScope.launch { sheetState.show() } },
+                onLaunchOneTapSignIn = onLaunchOneTapSignIn,
                 onNavigateToSearchPackageScreen = onNavigateToSearchPackageScreen,
+                onNavigateToNotificationsScreen = onNavigateToNotificationsScreen,
                 onNavigateToAddPackageScreen = onNavigateToAddPackageScreen
             )
             PackagesList(
@@ -151,8 +147,11 @@ private fun BoxScope.PackagesMapScreenAppBar(
     modifier: Modifier = Modifier,
     account: UserEntity? = null,
     isSignedIn: Boolean = false,
+    notificationsCount: Int = 0,
     onShowBottomSheet: () -> Unit,
+    onLaunchOneTapSignIn: () -> Unit,
     onNavigateToSearchPackageScreen: () -> Unit,
+    onNavigateToNotificationsScreen: () -> Unit,
     onNavigateToAddPackageScreen: () -> Unit
 ) {
     SmallTopAppBar(
@@ -163,12 +162,18 @@ private fun BoxScope.PackagesMapScreenAppBar(
             containerColor = Color.Transparent
         ),
         navigationIcon = {
-            if (isSignedIn) {
-                account?.avatar?.let {
-                    // TODO: Show initials if there's no image to display
-                    Avatar(onClick = onShowBottomSheet) {
+            Avatar(onClick = if (isSignedIn) onShowBottomSheet else onLaunchOneTapSignIn) {
+                if (isSignedIn) {
+                    account?.avatar?.let {
                         NetworkImage(modifier = modifier.fillMaxSize(), uri = it)
                     }
+                } else {
+                    Icon(
+                        modifier = modifier.size(18.dp),
+                        imageVector = Icons.Rounded.PersonAdd,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         },
@@ -180,6 +185,21 @@ private fun BoxScope.PackagesMapScreenAppBar(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface
                 )
+            }
+            IconButton(onClick = onNavigateToNotificationsScreen) {
+                BadgedBox(
+                    badge = {
+                        if (notificationsCount > 0) {
+                            Badge { Text(text = "$notificationsCount") }
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Notifications,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
             IconButton(onClick = onNavigateToAddPackageScreen) {
                 Icon(
@@ -229,29 +249,25 @@ private fun BottomSheet(
     onChangeAccount: () -> Unit,
     onSignOut: () -> Unit
 ) {
-    Surface(modifier.navigationBarsPadding()) {
-        Column {
-            TextButton(onClick = onChangeAccount) {
-                Icon(
-                    modifier = modifier.size(ButtonDefaults.IconSize),
-                    imageVector = Icons.Rounded.AccountCircle,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier.width(ButtonDefaults.IconSpacing))
-                Text(text = "Trocar de conta")
-            }
-            TextButton(onClick = onSignOut) {
-                Icon(
-                    modifier = modifier.size(ButtonDefaults.IconSize),
-                    imageVector = Icons.Rounded.Logout,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier.width(ButtonDefaults.IconSpacing))
-                Text(text = "Sair")
-            }
-        }
+    TextButton(onClick = onChangeAccount) {
+        Icon(
+            modifier = modifier.size(ButtonDefaults.IconSize),
+            imageVector = Icons.Rounded.AccountCircle,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier.width(ButtonDefaults.IconSpacing))
+        Text(text = "Trocar de conta")
+    }
+    TextButton(onClick = onSignOut) {
+        Icon(
+            modifier = modifier.size(ButtonDefaults.IconSize),
+            imageVector = Icons.Rounded.Logout,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier.width(ButtonDefaults.IconSpacing))
+        Text(text = "Sair")
     }
 }
 

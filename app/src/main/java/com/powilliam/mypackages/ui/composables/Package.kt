@@ -1,6 +1,5 @@
 package com.powilliam.mypackages.ui.composables
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,7 +33,8 @@ fun PackageOnMapCard(
             .padding(8.dp),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 2.dp
+        shadowElevation = 2.dp,
+        tonalElevation = 1.dp
     ) {
         Column {
             Package(
@@ -74,7 +74,8 @@ fun PackageOnMapCard(
 fun PackageCard(entity: Package) {
     Surface(
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp
     ) {
         Column {
             Package(
@@ -183,15 +184,15 @@ fun EventsCard(modifier: Modifier = Modifier, events: List<Event> = emptyList())
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        color = MaterialTheme.colorScheme.surface
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp
     ) {
         LazyColumn {
             itemsIndexed(events.reversed()) { position, event ->
                 PackageDetail(
                     iconSize = 44.dp,
                     icon = {
-                        Avatar(color = MaterialTheme.colorScheme.tertiary) {
+                        Avatar(color = MaterialTheme.colorScheme.tertiaryContainer) {
                             Text(
                                 modifier = modifier.align(Alignment.Center),
                                 text = "${position.plus(1)}",
