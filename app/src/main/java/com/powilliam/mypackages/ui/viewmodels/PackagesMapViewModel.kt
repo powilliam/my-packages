@@ -2,6 +2,7 @@ package com.powilliam.mypackages.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.powilliam.mypackages.data.entity.Brazil
 import com.powilliam.mypackages.data.entity.Coordinates
 import com.powilliam.mypackages.data.entity.Package
@@ -18,7 +19,9 @@ data class PackagesMapUiState(
     val isAuthFeatureEnabled: Boolean = true,
     val packages: List<Package> = emptyList(),
     val coordinates: Coordinates = Brazil,
-    val notificationsCount: Int = 0
+    val notificationsCount: Int = 0,
+    val hasFailedToAuthenticate: Boolean = false,
+    val authenticationFailureReason: String = ""
 ) {
     val isSignedIn = account != null
     val shouldPromptSignIn = isSignedIn.not() and isAuthFeatureEnabled
@@ -91,7 +94,22 @@ class PackagesMapViewModel @Inject constructor(
 
     fun onAuthenticateWithGoogleSignIn(idToken: String?) = viewModelScope.launch {
         authRepository.authenticateWithGoogleSignIn(idToken)?.let { account ->
-            _uiState.update { it.copy(account = account) }
+            _uiState.update {
+                it.copy(
+                    account = account,
+                    hasFailedToAuthenticate = false,
+                    authenticationFailureReason = ""
+                )
+            }
+        }
+    }
+
+    fun onFailToAuthenticateWithGoogleSignIn(exception: Throwable) = viewModelScope.launch {
+        _uiState.update { state ->
+            state.copy(
+                hasFailedToAuthenticate = true,
+                authenticationFailureReason = exception.message ?: "No Reason"
+            )
         }
     }
 

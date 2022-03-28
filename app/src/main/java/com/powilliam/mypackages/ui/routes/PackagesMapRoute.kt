@@ -1,6 +1,7 @@
 package com.powilliam.mypackages.ui.routes
 
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -35,6 +36,7 @@ fun PackagesMapRoute(
             viewModel.onAuthenticateWithGoogleSignIn(credentials.googleIdToken)
         } catch (exception: Exception) {
             Log.e("GoogleSignIn", exception.message ?: "Failed to SignIn")
+            viewModel.onFailToAuthenticateWithGoogleSignIn(exception)
         }
     }
     val launchSignIn = {
@@ -52,6 +54,10 @@ fun PackagesMapRoute(
             viewModel.onCollectPackagesBasedOnSignedAccount()
             viewModel.onCollectNotificationsCount(account.id)
         }
+    }
+
+    LaunchedEffect(uiState.hasFailedToAuthenticate, uiState.authenticationFailureReason) {
+        Toast.makeText(context, uiState.authenticationFailureReason, Toast.LENGTH_LONG).show()
     }
 
     PackagesMapScreen(
