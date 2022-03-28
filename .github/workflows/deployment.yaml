@@ -25,6 +25,9 @@ jobs:
           gpg -d --passphrase '${{ secrets.GPG_PASSPHRASE }}' --batch fastlane/google-services.json.gpg > fastlane/google-services.json
 
           export RELEASE_STORE_FILE=$(pwd)/app/mypackagesprod.keystore
+          export RELEASE_STORE_PASSWORD='${{ secrets.RELEASE_STORE_PASSWORD }}'
+          export RELEASE_KEY_ALIAS='${{ secrets.RELEASE_KEY_ALIAS }}'
+          export RELEASE_KEY_PASSWORD='${{ secrets.RELEASE_KEY_PASSWORD }}'
 
           bundle install
           bundle exec fastlane deploy track:Staging
