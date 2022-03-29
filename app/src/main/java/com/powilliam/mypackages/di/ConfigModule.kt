@@ -1,7 +1,9 @@
 package com.powilliam.mypackages.di
 
 import android.content.Context
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,33 +13,30 @@ import javax.inject.Singleton
 import com.powilliam.mypackages.R
 
 @Retention(AnnotationRetention.BINARY)
-annotation class OneTapSignInRequest
+annotation class FirebaseGoogleSignInOptions
 
 @Retention(AnnotationRetention.BINARY)
-annotation class GoogleIdTokenRequestOptions
+annotation class FirebaseGoogleSignInClient
 
 @Module
 @InstallIn(SingletonComponent::class)
 object ConfigModule {
-    @GoogleIdTokenRequestOptions
+    @FirebaseGoogleSignInOptions
     @Singleton
     @Provides
-    fun provideGoogleIdTokenRequestOptions(@ApplicationContext context: Context): BeginSignInRequest.GoogleIdTokenRequestOptions =
-        BeginSignInRequest.GoogleIdTokenRequestOptions
-            .Builder()
-            .setSupported(true)
-            .setServerClientId(context.getString(R.string.default_web_client_id))
-            .setFilterByAuthorizedAccounts(false)
-            .build()
-
-    @OneTapSignInRequest
-    @Singleton
-    @Provides
-    fun provideOneTapSignInRequest(
-        @GoogleIdTokenRequestOptions googleIdTokenRequestOptions: BeginSignInRequest.GoogleIdTokenRequestOptions
-    ): BeginSignInRequest = BeginSignInRequest
+    fun provideGoogleSignInOptions(
+        @ApplicationContext context: Context
+    ): GoogleSignInOptions = GoogleSignInOptions
         .Builder()
-        .setGoogleIdTokenRequestOptions(googleIdTokenRequestOptions)
-        .setAutoSelectEnabled(false)
+        .requestIdToken(context.getString(R.string.default_web_client_id))
+        .requestEmail()
         .build()
+
+    @FirebaseGoogleSignInClient
+    @Singleton
+    @Provides
+    fun provideGoogleSignInClient(
+        @ApplicationContext context: Context,
+        @FirebaseGoogleSignInOptions options: GoogleSignInOptions
+    ): GoogleSignInClient = GoogleSignIn.getClient(context, options)
 }

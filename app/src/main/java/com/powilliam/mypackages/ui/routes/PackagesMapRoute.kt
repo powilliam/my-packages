@@ -5,45 +5,39 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import com.powilliam.mypackages.ui.Destination
 import com.powilliam.mypackages.ui.screens.PackagesMapScreen
 import com.powilliam.mypackages.ui.viewmodels.PackagesMapUiState
 import com.powilliam.mypackages.ui.viewmodels.PackagesMapViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun PackagesMapRoute(
     navController: () -> NavController,
-    beginSignIn: suspend () -> IntentSenderRequest,
+    beginSignIn: () -> IntentSenderRequest,
 ) {
-    val context = LocalContext.current
-
     val viewModel = hiltViewModel<PackagesMapViewModel>()
     val uiState by viewModel.uiState.collectAsState(PackagesMapUiState())
-    val coroutineScope = rememberCoroutineScope()
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         try {
-            val credentials = Identity
-                .getSignInClient(context)
-                .getSignInCredentialFromIntent(result.data)
-            viewModel.onAuthenticateWithGoogleSignIn(credentials.googleIdToken)
+            val account = GoogleSignIn
+                .getSignedInAccountFromIntent(result.data)
+                .getResult(ApiException::class.java)
+            viewModel.onAuthenticateWithGoogleSignIn(account.idToken)
         } catch (exception: Exception) {
             Log.e("GoogleSignIn", exception.message ?: "Failed to SignIn")
         }
     }
     val launchSignIn = {
-        coroutineScope.launch {
-            try {
-                launcher.launch(beginSignIn())
-            } catch (exception: Exception) {
-                Log.e("GoogleSignIn", exception.message ?: "Failed to SignIn")
-            }
+        try {
+            launcher.launch(beginSignIn())
+        } catch (exception: Exception) {
+            Log.e("GoogleSignIn", exception.message ?: "Failed to SignIn")
         }
     }
 
