@@ -12,7 +12,7 @@ import androidx.navigation.navArgument
 import com.powilliam.mypackages.ui.routes.*
 
 @Composable
-fun NavigationGraph(beginSignIn: suspend () -> IntentSenderRequest) {
+fun NavigationGraph(beginSignIn: () -> IntentSenderRequest) {
     val navController = rememberNavController()
 
     NavHost(navController, startDestination = Destination.PackagesMap.route) {
@@ -22,7 +22,7 @@ fun NavigationGraph(beginSignIn: suspend () -> IntentSenderRequest) {
 
 private fun NavGraphBuilder.addPackagesScreen(
     navController: NavController,
-    beginSignIn: suspend () -> IntentSenderRequest
+    beginSignIn: () -> IntentSenderRequest
 ) {
     composable(route = Destination.PackagesMap.route) {
         PackagesMapRoute(
