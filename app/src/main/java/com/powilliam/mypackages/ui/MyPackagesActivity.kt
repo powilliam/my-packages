@@ -56,6 +56,7 @@ class MyPackagesActivity : ComponentActivity() {
 
 
     private fun beginSignIn(): IntentSenderRequest {
+        googleSignInClient.signOut()
         val pendingIntent = createGoogleSignInPendingIntent()
         return IntentSenderRequest.Builder(pendingIntent).build()
     }
