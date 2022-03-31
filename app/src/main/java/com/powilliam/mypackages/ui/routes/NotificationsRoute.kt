@@ -18,12 +18,6 @@ fun NotificationsRoute(navController: () -> NavController) {
     val viewModel = hiltViewModel<NotificationsViewModel>()
     val uiState by viewModel.uiState.collectAsState(NotificationsUiState())
 
-    LaunchedEffect(uiState.account) {
-        uiState.account?.let { account ->
-            viewModel.onCollectNotificationsByReceiverId(account.id)
-        }
-    }
-
     LaunchedEffect(Unit) {
         withTimeout(HALF_OF_ONE_SECOND_IN_MILLISECONDS) {
             viewModel.onMarkAllNotificationsAsVisualized()
@@ -32,11 +26,7 @@ fun NotificationsRoute(navController: () -> NavController) {
 
     NotificationsScreen(
         uiState = uiState,
-        onDeleteAllNotifications = {
-            uiState.account?.let { account ->
-                viewModel.onDeleteAllNotifications(account.id)
-            }
-        },
+        onDeleteAllNotifications = {},
         onNavigateToPreviousScreen = { navController().popBackStack() }
     )
 }

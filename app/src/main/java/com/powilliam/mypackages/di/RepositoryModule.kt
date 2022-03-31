@@ -13,34 +13,9 @@ import javax.inject.Singleton
 object RepositoryModule {
     @Singleton
     @Provides
-    fun provideAuthRepository(authRemoteDataSource: AuthRemoteDataSource): AuthRepository =
-        AuthRepositoryImpl(authRemoteDataSource)
-
-    @Singleton
-    @Provides
-    fun provideFeatureFlagRepository(
-        featureFlagRemoteDataSource: FeatureFlagRemoteDataSource
-    ): FeatureFlagRepository = FeatureFlagRepositoryImpl(featureFlagRemoteDataSource)
-
-    @Singleton
-    @Provides
     fun providePackageRepository(
-        authRemoteDataSource: AuthRemoteDataSource,
-        packageRemoteDataSource: PackageRemoteDataSource,
-    ): PackageRepository = PackageRepositoryImpl(
-        authRemoteDataSource,
-        packageRemoteDataSource,
-    )
-
-    @Singleton
-    @Provides
-    fun provideUserSettingsRepository(
-        deviceTokenLocalDataSource: DeviceTokenLocalDataSource,
-        userSettingsRemoteDataSource: UserSettingsRemoteDataSource
-    ): UserSettingsRepository = UserSettingsRepositoryImpl(
-        deviceTokenLocalDataSource,
-        userSettingsRemoteDataSource
-    )
+        packageRemoteDataSource: PackageRemoteDataSource
+    ): PackageRepository = PackageRepositoryImpl(packageRemoteDataSource)
 
     @Singleton
     @Provides
