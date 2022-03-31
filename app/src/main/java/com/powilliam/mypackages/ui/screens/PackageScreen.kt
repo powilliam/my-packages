@@ -15,9 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.statusBarsPadding
-import com.powilliam.mypackages.ui.composables.EventsCard
 import com.powilliam.mypackages.ui.composables.ModalBottomSheet
-import com.powilliam.mypackages.ui.composables.PackageCard
 import com.powilliam.mypackages.ui.viewmodels.PackageUiState
 import kotlinx.coroutines.launch
 
@@ -75,8 +73,6 @@ fun PackageScreen(
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 uiState.entity?.let { entity ->
                     Box {}
-                    PackageCard(entity)
-                    EventsCard(events = entity.events)
                 }
             }
         }
